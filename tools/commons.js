@@ -1,12 +1,19 @@
-// const bcrypt = require("brcypt")
+const bcrypt = require("bcrypt")
 
-// const getHashPassword = async function(password) {
-//     const salt = await bcrypt.genSalt(10)
-//     const hashPassword = await bcrypt.hash(password, salt)
+const getHashPassword = async function(password) {
+    try {
+        const salt = await bcrypt.genSalt(10)
+        const hashPassword = await bcrypt.hash(password, salt)
 
-//     return hashPassword
-// }
+        return {
+            salt: salt, 
+            hashPassword: hashPassword
+        }
+    } catch (error) {
+        console.error("Error creating has password " + error)
+    }
+}
 
-// module.exports = {
-//     getHashPassword
-// }
+module.exports = {
+    getHashPassword
+}

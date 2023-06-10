@@ -6,17 +6,18 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true,
         },
-        uuid: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4
-        },
-        createdAt: "created_at",
-        updatedAt: "updated_at",
         isDeleted: {
+            field: "is_deleted",
             type: DataTypes.BOOLEAN,
         },
+        deletedAt: {
+            field: "deleted_at",
+            type: DataTypes.DATE
+        },
         uuid: {
             type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            unique: true
         },
         username: {
             type: DataTypes.STRING,
@@ -37,7 +38,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
 
-    })
+    }, {
+        createdAt: "created_at",
+        updatedAt: "updated_at"
+    });
 
     return Admin
 }

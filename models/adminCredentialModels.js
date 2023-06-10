@@ -6,14 +6,13 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true,
         },
-        createdAt: "created_at",
-        updatedAt: "updated_at",
         isDeleted: {
             field: "is_deleted",
             type: DataTypes.BOOLEAN,
         },
-        uuid: {
-            type: DataTypes.UUID,
+        deletedAt: {
+            field: "deleted_at",
+            type: DataTypes.DATE
         },
         adminID: {
             field: "admin_id",
@@ -29,7 +28,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
 
-    })
-
+    }, {
+        createdAt: "created_at",
+        updatedAt: "updated_at"
+    });
     return AdminCredential
 }
