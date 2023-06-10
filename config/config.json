@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "n1567931_admin_bringkad_arena",
+    "password": "n1567931_admin_bringkad_arena",
+    "database": "n1567931_bringkad-arena",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

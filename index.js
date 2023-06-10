@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors")
-const adminRouter = require("./app/routes/adminRoutes.js")
+const adminRouter = require("./routes/adminRoutes.js")
 
+const db = require("./models")
 
 const app = express();
 
@@ -24,7 +25,11 @@ app.get("/", (req, res) => {
   
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-console.log(`Server is running on port ${PORT}.`);
-});
+
+db.sequelize.sync().then((req) => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}.`);
+    });
+})
+
   
