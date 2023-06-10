@@ -41,7 +41,7 @@ const registerAdmin = async (req, res) => {
 }   
 
 const loginAdmin = async (req, res) => {
-
+    
 }
 
 const getAdminList = async (req, res) => {
