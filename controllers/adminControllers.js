@@ -55,8 +55,6 @@ const loginAdmin = async (req, res) => {
             }
         })
 
-        console.error("admin " + admin)
-
         if (admin == null) {
             res.status(400).json({
                 code: 400,
@@ -70,7 +68,6 @@ const loginAdmin = async (req, res) => {
             }
         })
 
-        console.error(adminCred)
         if (adminCred == null) {
             res.status(400).json({
                 code: 400,
@@ -87,8 +84,6 @@ const loginAdmin = async (req, res) => {
                 message: "Password or Username incorrect",
             })
         };
-
-        console.error(checkPassword)
 
         // generate jwt token for auth token
         let tokenPayload = {
@@ -123,7 +118,6 @@ const loginAdmin = async (req, res) => {
 
         // save the new token in db 
         await db.tokens.create(tokenData)
-
 
         res.status(200).json({
             code: 200,
