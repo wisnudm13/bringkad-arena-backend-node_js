@@ -9,13 +9,12 @@ const authValidator = (authType) => async function(req, res, next) {
         if (!authHeader) {
             return res.status(401).send({
                 code: 401,
-                message: "1. Unauthorized",
+                message: "Unauthorized",
             })
         }
 
         // get the token from header, check token from db
         const token = authHeader.split(' ')[1];
-        console.error("is user " + authType)
 
         if(authType == "admin") {
             const adminToken = await db.tokens.findOne({
@@ -31,9 +30,12 @@ const authValidator = (authType) => async function(req, res, next) {
             if(!adminToken) {
                 return res.status(401).send({
                     code: 401,
-                    message: "2. Unauthorized",
+                    message: "Unauthorized",
                 })
             }
+
+        } else {
+            //TODO VALIDATE USER TOKEN
         }
 
         // verify jwt token
@@ -43,7 +45,7 @@ const authValidator = (authType) => async function(req, res, next) {
                 
                 return res.status(401).send({
                     code: 401,
-                    message: "3. Unauthorized",
+                    message: "Unauthorized",
                 })
             }
 
@@ -56,7 +58,7 @@ const authValidator = (authType) => async function(req, res, next) {
         console.error(error)
         return res.status(401).send({ 
             code: 401,
-            message: "4. Unauthorized" 
+            message: "Unauthorized" 
         });
     }
 }

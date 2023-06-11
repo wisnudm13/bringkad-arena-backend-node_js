@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors")
 const adminRouter = require("./routes/adminRoutes.js")
+const tokenRouter = require("./routes/tokenRoutes.js")
 const db = require("./models")
 
 // instantiante app
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use("/v1/admins/", adminRouter)
+app.use("/v1/tokens/", tokenRouter)
 
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to bezkoder application." });
