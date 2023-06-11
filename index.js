@@ -30,8 +30,9 @@ app.get("/", (req, res) => {
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 
-// sync the db
-db.sequelize.sync()
+// sync the db or use authenticate if dont want to sync the table
+// db.sequelize.sync()
+db.sequelize.authenticate()
 .then((req) => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);

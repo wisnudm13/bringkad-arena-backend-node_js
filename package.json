@@ -4,7 +4,9 @@
   "description": "backend bringkad arena using node.js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db-migrate": "npx sequelize-cli db:migrate",
+    "dev-start": "node index.js"
   },
   "author": "",
   "license": "ISC",
