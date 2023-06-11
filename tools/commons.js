@@ -10,10 +10,26 @@ const getHashPassword = async function(password) {
             hashPassword: hashPassword
         }
     } catch (error) {
-        console.error("Error creating has password " + error)
+        console.error("Error creating hash password " + error)
     }
 }
 
+const checkHashPassword = async function(password, hashPassword) {
+    try {
+        const result = await bcrypt.compare(password, hashPassword)
+        return result
+
+    } catch (error) {
+        console.error("Error checking hash password " + error)
+        return false
+
+    }
+}
+
+const generateAuthToken = async function() {}
+
 module.exports = {
-    getHashPassword
+    getHashPassword,
+    checkHashPassword,
+    generateAuthToken
 }

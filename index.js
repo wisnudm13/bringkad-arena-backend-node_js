@@ -1,11 +1,13 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors")
 const adminRouter = require("./routes/adminRoutes.js")
-
 const db = require("./models")
 
+// instantiante app
 const app = express();
 
+// set cors
 var corsOptions = {
     origin: "http://localhost:8081"
 }
@@ -26,6 +28,7 @@ app.get("/", (req, res) => {
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 
+// sync the db
 db.sequelize.sync()
 .then((req) => {
   app.listen(PORT, () => {

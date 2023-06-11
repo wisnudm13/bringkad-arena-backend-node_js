@@ -1,8 +1,6 @@
 const tools = require("../tools/commons.js")
 const db = require("../models")
-
-const Admin = db.admins
-const AdminCred = db.admin_credentials
+const { Op } = require("sequelize");
 
 const registerAdmin = async (req, res) => {
     try {
@@ -14,13 +12,13 @@ const registerAdmin = async (req, res) => {
         }
         
         // create new admin
-        const admin = await Admin.create(data)
+        const admin = await db.admins.create(data)
 
         // hash password
         const {salt, hashPassword} = await tools.getHashPassword(req.body.password)
 
         // create admin credentials
-        const adminCred = await AdminCred.create({
+        await db.admin_credentials.create({
             adminID: admin.id,
             salt: salt,
             password: hashPassword
@@ -35,17 +33,45 @@ const registerAdmin = async (req, res) => {
         console.error(error)
         res.status(400).json({
             message: "Error occured when creating admin",
-            errors: error.errors.message
+            errors: error
         });
     }
 }   
 
 const loginAdmin = async (req, res) => {
-    
+    // check if admin is found
+    const admin = await db.admins.findOne({
+        where: {
+            [Op.or]: [
+                { username: req.body.username },
+                { email: req.body.email }
+            ]
+        }
+    })
+
+    if (admin == null) {
+        res.status(400).json({
+            message: "Password or Username incorrect",
+        })
+    }
+
+    // check if password is valid
+    checkPassword = await tools.checkHashPassword(req.body.password, admin.password)
+
+    if (!checkPassword) {
+        res.status(400).json({
+            message: "Password or Username incorrect",
+        })
+
+    // generate jwt token for auth token
+
+    res.status(200).json()
+
+    }
 }
 
 const getAdminList = async (req, res) => {
-    let adminList = await Admin.findAll({
+    let adminList = await db.admins.findAll({
         attributes: [
             "id",
             "username",
@@ -60,7 +86,7 @@ const getAdminList = async (req, res) => {
 const getAdminById = async (req, res) => {
     let id = req.params.admin_id
 
-    let getAdmin = await Admin.findOne({ where: { id: id }})
+    let getAdmin = await db.admins.findOne({ where: { id: id }})
     res.status(200).send(getAdmin)
 }
 
