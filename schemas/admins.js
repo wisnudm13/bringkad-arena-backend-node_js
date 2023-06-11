@@ -1,4 +1,3 @@
-const { body } = require("express-validator");
 const Joi = require('joi');
 const db = require("../models")
 
@@ -58,20 +57,22 @@ const registerAdminSchema = Joi.object().keys({
             "any.only": "{{#label}} does not match with Password"
         })
 
-})
+});
 
-const loginAdminSchema = {
-    email_or_username: {
-        isEmpty: {
-            errorMessage: "Email or Username cannot be empty",
-        },
-    },
-    password: {
-        isEmpty: {
-            errorMessage: "Password cannot be empty"
-        }
-    }
-};
+const loginAdminSchema = Joi.object().keys({
+    email_or_username: Joi.string()
+        .required()
+        .messages({
+            "any.required": "{#label} is a required field",
+            "string.empty": "{#label} cannot be empty",
+        }),
+    password: Joi.string()
+        .required()
+        .messages({
+            "any.required": "{#label} is a required field",
+            "string.empty": "{#label} cannot be empty",
+        }),
+});
 
 module.exports = { 
     registerAdminSchema, 

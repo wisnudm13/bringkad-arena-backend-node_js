@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const validate = (schema) => async function(req, res, next) {
+const schemaValidator = (schema) => async function(req, res, next) {
         try {
             await schema.validateAsync(req.body);
             next();
@@ -22,5 +22,5 @@ const validate = (schema) => async function(req, res, next) {
         }
     }
 module.exports = {
-    validate,
+    schemaValidator,
 }

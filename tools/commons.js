@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt")
+const jwt = require('jsonwebtoken');
 
 const getHashPassword = async function(password) {
     try {
@@ -26,7 +27,17 @@ const checkHashPassword = async function(password, hashPassword) {
     }
 }
 
-const generateAuthToken = async function() {}
+const generateAuthToken = async function(tokenPayload) {
+    try {
+        return jwt.sign(tokenPayload, process.env.JWT_AUTH_SECRET_KEY, {
+            expiresIn: "30s"
+        });
+
+    } catch (error) {
+        console.error("Error generate auth token " + error)
+        return null
+    }
+}
 
 module.exports = {
     getHashPassword,
