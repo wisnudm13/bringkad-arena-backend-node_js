@@ -45,6 +45,9 @@ const loginAdmin = async (req, res) => {
         // check if admin is found
         const admin = await db.admins.findOne({
             where: {
+                isDeleted: {
+                    [Op.eq]: false
+                },
                 [Op.or]: [
                     { username: req.body.email_or_username },
                     { email: req.body.email_or_username }
@@ -52,44 +55,46 @@ const loginAdmin = async (req, res) => {
             }
         })
 
+        console.error("admin " + admin)
+
         if (admin == null) {
             res.status(400).json({
                 code: 400,
-                message: "Password or Username incorrect",
+                message: "1. Password or Username incorrect",
             })
         }
 
         const adminCred = await db.admin_credentials.findOne({
             where: {
-                admin_id: admin.id
+                adminID: admin.id
             }
         })
 
+        console.error(adminCred)
         if (adminCred == null) {
             res.status(400).json({
                 code: 400,
-                message: "Password or Username incorrect",
+                message: "2. Password or Username incorrect",
             })
         }
 
         // check if password is valid
-        checkPassword = await tools.checkHashPassword(req.body.password, adminCred.password)
+        checkPassword = await tools.checkHashPassword(req.body.password, adminCred.password);
 
         if (!checkPassword) {
-            console.log("result check password " + checkPassword)
             res.status(400).json({
                 code: 400,
                 message: "Password or Username incorrect",
             })
-        }
+        };
+
+        console.error(checkPassword)
 
         // generate jwt token for auth token
         let tokenPayload = {
             admin_id: admin.id,
             admin_username: admin.username
-        }
-
-        console.error(tokenPayload)
+        };
 
         authToken = await tools.generateAuthToken(tokenPayload);
 
@@ -98,13 +103,34 @@ const loginAdmin = async (req, res) => {
                 code: 400,
                 message: "Login Error",
             })
+        };
+
+        // expire all token in db
+        await db.tokens.update({
+            isActive: false,
+            isDeleted: true,
+        }, {
+            where: {
+                adminID: admin.id
+            }
+        });
+
+        let tokenData = {
+            adminID: admin.id,
+            token: authToken,
+            isActive: true
         }
+
+        // save the new token in db 
+        await db.tokens.create(tokenData)
+
 
         res.status(200).json({
             code: 200,
             data: {
                 auth_token: authToken,
-                admin_id
+                admin_id: admin.id,
+                admin_username: admin.username
             }
 
         })

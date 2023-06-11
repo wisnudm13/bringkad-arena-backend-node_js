@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         isDeleted: {
             field: "is_deleted",
             type: DataTypes.BOOLEAN,
+            defaultValue: false
         },
         deletedAt: {
             field: "deleted_at",

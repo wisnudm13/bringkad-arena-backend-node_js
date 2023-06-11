@@ -8,7 +8,9 @@ const registerAdminSchema = Joi.object().keys({
         .max(16)
         .label("Username")
         .external(async (data) => {
-            const getAdmin = await db.admins.findOne({ where: { username: data }});
+            const getAdmin = await db.admins.findOne({ 
+                where: { username: data, is_deleted: false }
+            });
 
             if (getAdmin) {
                 throw new Joi.ValidationError("Username has been used")
@@ -28,7 +30,9 @@ const registerAdminSchema = Joi.object().keys({
         .email()
         .label("Email")
         .external(async (data) => {
-            const getAdmin = await db.admins.findOne({ where: { email: data }});
+            const getAdmin = await db.admins.findOne({ 
+                where: { email: data, is_deleted: false }
+            });
 
             if (getAdmin) {
                 throw new Joi.ValidationError("Email has been used")

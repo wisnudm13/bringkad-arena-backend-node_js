@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Admin = sequelize.define("admins", {
+    const Token = sequelize.define("tokens", {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -15,28 +15,21 @@ module.exports = (sequelize, DataTypes) => {
             field: "deleted_at",
             type: DataTypes.DATE
         },
-        uuid: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            unique: true
+        adminID: {
+            field: "admin_id",
+            type: DataTypes.INTEGER,
         },
-        username: {
+        userID: {
+            field: "user_id",
+            type: DataTypes.INTEGER,
+        },
+        token: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true
-        }, 
-        email: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
         },
         isActive: {
             field: "is_active",
             type: DataTypes.BOOLEAN,
-        },
-        phoneNumber: {
-            field: "phone_number",
-            type: DataTypes.STRING,
         },
 
     }, {
@@ -44,5 +37,5 @@ module.exports = (sequelize, DataTypes) => {
         updatedAt: "updated_at"
     });
 
-    return Admin
+    return Token
 }
