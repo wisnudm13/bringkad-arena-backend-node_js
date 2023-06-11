@@ -18,7 +18,11 @@ module.exports = (sequelize, DataTypes) => {
         adminID: {
             field: "admin_id",
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model:"admins",
+                key:"id"
+              },
         },
         password: {
             type: DataTypes.STRING,
@@ -33,5 +37,13 @@ module.exports = (sequelize, DataTypes) => {
         createdAt: "created_at",
         updatedAt: "updated_at"
     });
+
+    // AdminCredential.associate = function(models) {
+    //     AdminCredential.belongsTo(models.Admin, {
+    //         foreignKey: 'admin_id',
+    //         as: 'admins',
+    //         onDelete: 'CASCADE',
+    //     });
+    // };
     return AdminCredential
 }
