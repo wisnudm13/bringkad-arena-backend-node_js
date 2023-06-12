@@ -5,7 +5,7 @@ const swaggerUI = require("swagger-ui-express");
 const swaggerJSDoc = require('swagger-jsdoc');
 const adminRouter = require("./routes/adminRoutes.js");
 const tokenRouter = require("./routes/tokenRoutes.js");
-
+const db = require("./models");
 
 // instantiate swagger config
 const swaggerDefinition = {
@@ -25,7 +25,7 @@ const swaggerDefinition = {
 const options = {
   swaggerDefinition,
   // Paths to files containing OpenAPI definitions
-  apis: ['./routes/*.js'],
+  apis: ["./api_docs/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options)
@@ -56,22 +56,22 @@ app.get("/", (req, res) => {
   });
   
 // set port, listen for requests
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 6060;
 
 // sync the db or use authenticate if dont want to sync the table
 // db.sequelize.sync()
-// db.sequelize.authenticate()
-// .then((req) => {
-//   app.listen(PORT, () => {
-//     console.log(`Server is running on port ${PORT}.`);
-//     });
-// })
-// .catch(error => {
-//   console.error("erorrr" + error)
-// })
+db.sequelize.authenticate()
+.then((req) => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}.`);
+    });
+})
+.catch(error => {
+  console.error("erorrr" + error)
+})
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-  });
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}.`);
+//   });
 
   
