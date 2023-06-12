@@ -1,9 +1,35 @@
 require('dotenv').config();
 const express = require("express");
-const cors = require("cors")
-const adminRouter = require("./routes/adminRoutes.js")
-const tokenRouter = require("./routes/tokenRoutes.js")
-const db = require("./models")
+const cors = require("cors");
+const swaggerUI = require("swagger-ui-express");
+const swaggerJSDoc = require('swagger-jsdoc');
+const adminRouter = require("./routes/adminRoutes.js");
+const tokenRouter = require("./routes/tokenRoutes.js");
+
+
+// instantiate swagger config
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Bringkad Arena API',
+    version: '1.0.0',
+    description: "Documentation for Bringkad Arena API"
+  },
+  servers: [
+    {
+      url: "https://api-dev.bringkadarena.com"
+    }
+  ]
+};
+
+const options = {
+  swaggerDefinition,
+  // Paths to files containing OpenAPI definitions
+  apis: ['./routes/*.js'],
+};
+
+const swaggerSpec = swaggerJSDoc(options)
+
 
 // instantiante app
 const app = express();
@@ -22,24 +48,30 @@ app.use(express.urlencoded({ extended: true }));
 // routes
 app.use("/v1/admins/", adminRouter)
 app.use("/v1/tokens/", tokenRouter)
+app.use("/v1/api-docs/", swaggerUI.serve, swaggerUI.setup(swaggerSpec))
+
 
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to bezkoder application." });
   });
   
 // set port, listen for requests
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 9000;
 
 // sync the db or use authenticate if dont want to sync the table
 // db.sequelize.sync()
-db.sequelize.authenticate()
-.then((req) => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
-    });
-})
-.catch(error => {
-  console.error("erorrr" + error)
-})
+// db.sequelize.authenticate()
+// .then((req) => {
+//   app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}.`);
+//     });
+// })
+// .catch(error => {
+//   console.error("erorrr" + error)
+// })
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
+  });
 
   
