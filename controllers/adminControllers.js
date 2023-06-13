@@ -1,6 +1,7 @@
 const tools = require("../tools/commons.js")
 const db = require("../models")
 const { Op } = require("sequelize");
+const { errorLogger, appLogger } = require("../tools/loggers.js");
 
 const registerAdmin = async (req, res) => {
     try {
@@ -10,6 +11,8 @@ const registerAdmin = async (req, res) => {
             phoneNumber: req.body.phone_number,
             isActive: true
         }
+
+        appLogger.info("Attempting create user, data: " + JSON.stringify(data))
         
         // create new admin
         const admin = await db.admins.create(data)
@@ -31,7 +34,7 @@ const registerAdmin = async (req, res) => {
         })
 
     } catch (error) {
-        console.error(error)
+        errorLogger.error("Error occured when creating admin, error: " + error)
         return res.status(400).json({
             code: 400,
             message: "Error occured when creating admin",
@@ -58,7 +61,7 @@ const loginAdmin = async (req, res) => {
         if (admin == null) {
             return res.status(400).json({
                 code: 400,
-                message: "1. Password or Username incorrect",
+                message: "Password or Username incorrect",
             })
         }
 
@@ -130,7 +133,7 @@ const loginAdmin = async (req, res) => {
         })
 
     } catch (error) {
-        console.error(error)
+        errorLogger.error("Error occured when login admin, error: " + error)
         return res.status(400).json({
             code: 400,
             message: "Error occured when login admin",
@@ -167,9 +170,16 @@ const getAdminById = async (req, res) => {
             "email",
             "is_active"
         ]
+    })
+
+    if (getAdmin == null) {
+        getAdmin = "No Admin found in given ID"
     }
-    )
-    return res.status(200).send(getAdmin)
+
+    return res.status(200).json({
+        code: 200,
+        data: getAdmin
+    })
 }
 
 module.exports = {

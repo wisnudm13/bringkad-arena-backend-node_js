@@ -6,6 +6,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const adminRouter = require("./routes/adminRoutes.js");
 const tokenRouter = require("./routes/tokenRoutes.js");
 const db = require("./models");
+const { errorLogger, appLogger } = require("./tools/loggers")
 
 // instantiate swagger config
 const swaggerDefinition = {
@@ -24,12 +25,10 @@ const swaggerDefinition = {
 
 const options = {
   swaggerDefinition,
-  // Paths to files containing OpenAPI definitions
   apis: ["./api_docs/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options)
-
 
 // instantiante app
 const app = express();
@@ -50,7 +49,6 @@ app.use("/v1/admins/", adminRouter)
 app.use("/v1/tokens/", tokenRouter)
 app.use("/v1/api-docs/", swaggerUI.serve, swaggerUI.setup(swaggerSpec))
 
-
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to bezkoder application." });
   });
@@ -63,11 +61,11 @@ const PORT = process.env.PORT || 6060;
 db.sequelize.authenticate()
 .then((req) => {
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
-    });
+    appLogger.info(`Server is running on port ${PORT}.`);
+  });
 })
 .catch(error => {
-  console.error("erorrr" + error)
+  errorLogger.error("Error starting server " + error)
 })
 
 // app.listen(PORT, () => {
