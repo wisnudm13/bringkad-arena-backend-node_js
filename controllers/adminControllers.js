@@ -24,7 +24,7 @@ const registerAdmin = async (req, res) => {
             password: hashPassword
         })
 
-        res.status(200).json({
+        return res.status(200).json({
             code: 200,
             message: "Successfully created admin",
             data: admin
@@ -32,7 +32,7 @@ const registerAdmin = async (req, res) => {
 
     } catch (error) {
         console.error(error)
-        res.status(400).json({
+        return res.status(400).json({
             code: 400,
             message: "Error occured when creating admin",
             errors: error
@@ -56,7 +56,7 @@ const loginAdmin = async (req, res) => {
         })
 
         if (admin == null) {
-            res.status(400).json({
+            return res.status(400).json({
                 code: 400,
                 message: "1. Password or Username incorrect",
             })
@@ -69,9 +69,9 @@ const loginAdmin = async (req, res) => {
         })
 
         if (adminCred == null) {
-            res.status(400).json({
+            return res.status(400).json({
                 code: 400,
-                message: "2. Password or Username incorrect",
+                message: "Password or Username incorrect",
             })
         }
 
@@ -79,7 +79,7 @@ const loginAdmin = async (req, res) => {
         checkPassword = await tools.checkHashPassword(req.body.password, adminCred.password);
 
         if (!checkPassword) {
-            res.status(400).json({
+            return res.status(400).json({
                 code: 400,
                 message: "Password or Username incorrect",
             })
@@ -94,7 +94,7 @@ const loginAdmin = async (req, res) => {
         authToken = await tools.generateAuthToken(tokenPayload);
 
         if (authToken == null) {
-            res.status(400).json({
+            return res.status(400).json({
                 code: 400,
                 message: "Login Error",
             })
@@ -119,7 +119,7 @@ const loginAdmin = async (req, res) => {
         // save the new token in db 
         await db.tokens.create(tokenData)
 
-        res.status(200).json({
+        return res.status(200).json({
             code: 200,
             data: {
                 auth_token: authToken,
@@ -131,14 +131,12 @@ const loginAdmin = async (req, res) => {
 
     } catch (error) {
         console.error(error)
-        res.status(400).json({
+        return res.status(400).json({
             code: 400,
             message: "Error occured when login admin",
             errors: error
         });
     }
-
-    
     
 }
 
@@ -152,14 +150,26 @@ const getAdminList = async (req, res) => {
         ]
     })
 
-    res.status(200).send(adminList)
+    return res.status(200).json({
+        code: 200,
+        data: adminList
+    });
 }
 
 const getAdminById = async (req, res) => {
     let id = req.params.admin_id
 
-    let getAdmin = await db.admins.findOne({ where: { id: id }})
-    res.status(200).send(getAdmin)
+    let getAdmin = await db.admins.findOne({ 
+        where: { id: id },
+        attributes: [
+            "id",
+            "username",
+            "email",
+            "is_active"
+        ]
+    }
+    )
+    return res.status(200).send(getAdmin)
 }
 
 module.exports = {

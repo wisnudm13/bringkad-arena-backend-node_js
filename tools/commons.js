@@ -30,7 +30,7 @@ const checkHashPassword = async function(password, hashPassword) {
 const generateAuthToken = async function(tokenPayload) {
     try {
         return jwt.sign(tokenPayload, process.env.JWT_AUTH_SECRET_KEY, {
-            expiresIn: "30s"
+            expiresIn: process.env.JWT_AUTH_EXPIRES_IN
         });
 
     } catch (error) {
