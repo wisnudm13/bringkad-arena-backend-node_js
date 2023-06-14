@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { errorLogger } = require('./loggers');
 
 const schemaValidator = (schema) => async function(req, res, next) {
     try {
@@ -6,7 +7,7 @@ const schemaValidator = (schema) => async function(req, res, next) {
         next();
 
     } catch (error) {
-        console.error(typeof error)
+        errorLogger.error(typeof error)
         if (error instanceof Joi.ValidationError) {
             return res.status(422).send({
                 code: 422,
@@ -15,7 +16,7 @@ const schemaValidator = (schema) => async function(req, res, next) {
             })
         }
 
-        console.error(error)
+        errorLogger.error(error)
         return res.status(500).send({ 
             message: "Something went wrong during validation" 
         });
@@ -23,5 +24,5 @@ const schemaValidator = (schema) => async function(req, res, next) {
 }
 
 module.exports = {
-    schemaValidator,
+    schemaValidator
 }

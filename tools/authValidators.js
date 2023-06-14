@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const db = require("../models")
+const { errorLogger, appLogger } = require("../tools/loggers.js")
 
 const authValidator = (authType) => async function(req, res, next) {
     try {
@@ -35,13 +36,28 @@ const authValidator = (authType) => async function(req, res, next) {
             }
 
         } else {
-            //TODO VALIDATE USER TOKEN
+            const userToken = await db.tokens.findOne({
+                where: {
+                    token: token,
+                    isActive: true
+                },
+                order: [
+                    ["created_at", "DESC"]
+                ]
+            })
+
+            if(!userToken) {
+                return res.status(401).send({
+                    code: 401,
+                    message: "Unauthorized",
+                })
+            }
         }
 
         // verify jwt token
         jwt.verify(token, process.env.JWT_AUTH_SECRET_KEY, (err, user) => {
             if (err) {
-                console.error(err)
+                errorLogger.error("Error when verifying Auth JWT " + err)
                 
                 return res.status(401).send({
                     code: 401,
@@ -49,13 +65,15 @@ const authValidator = (authType) => async function(req, res, next) {
                 })
             }
 
+            appLogger.info("Verify Auth JWT result " + user)
+
             req.user = user
             next();
 
         });
 
     } catch (error) {
-        console.error(error)
+        errorLogger.error("Error when verifying Auth JWT " + error)
         return res.status(401).send({ 
             code: 401,
             message: "Unauthorized" 

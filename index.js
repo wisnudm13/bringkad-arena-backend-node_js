@@ -5,8 +5,9 @@ const swaggerUI = require("swagger-ui-express");
 const swaggerJSDoc = require('swagger-jsdoc');
 const adminRouter = require("./routes/adminRoutes.js");
 const tokenRouter = require("./routes/tokenRoutes.js");
+const userRouter = require("./routes/userRoutes.js");
 const db = require("./models");
-const { errorLogger, appLogger } = require("./tools/loggers")
+const { errorLogger, appLogger } = require("./tools/loggers");
 
 // instantiate swagger config
 const swaggerDefinition = {
@@ -23,12 +24,12 @@ const swaggerDefinition = {
   ]
 };
 
-const options = {
+const swaggerOptions = {
   swaggerDefinition,
   apis: ["./api_docs/*.js"],
 };
 
-const swaggerSpec = swaggerJSDoc(options)
+const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
 // instantiante app
 const app = express();
@@ -47,6 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 // routes
 app.use("/v1/admins/", adminRouter)
 app.use("/v1/tokens/", tokenRouter)
+app.use("/v1/users/", userRouter)
 app.use("/v1/api-docs/", swaggerUI.serve, swaggerUI.setup(swaggerSpec))
 
 app.get("/", (req, res) => {
