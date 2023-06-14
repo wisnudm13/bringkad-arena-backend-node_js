@@ -162,9 +162,8 @@ const getUserById = async (req, res) => {
         where: { id: id },
         attributes: [
             "id",
-            "username",
-            "email",
-            "is_active"
+            "name",
+            "phone_number",
         ]
     })
 
