@@ -59,6 +59,7 @@ const loginUser = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Password or Phone Number incorrect",
+                data: {}
             })
         }
 
@@ -72,6 +73,7 @@ const loginUser = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Password or Phone Number incorrect",
+                data: {}
             })
         }
 
@@ -82,6 +84,7 @@ const loginUser = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Password or Phone Number incorrect",
+                data: {}
             })
         };
 
@@ -97,6 +100,7 @@ const loginUser = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Login Error",
+                data: {}
             })
         };
 
@@ -121,6 +125,7 @@ const loginUser = async (req, res) => {
 
         return res.status(200).json({
             code: 200,
+            message: "OK",
             data: {
                 auth_token: authToken,
                 user_id: user.id,
@@ -151,6 +156,7 @@ const getUserList = async (req, res) => {
 
     return res.status(200).json({
         code: 200,
+        message: "OK",
         data: userList
     });
 }
@@ -173,6 +179,7 @@ const getUserById = async (req, res) => {
 
     return res.status(200).json({
         code: 200,
+        message: "OK",
         data: getUser
     })
 }

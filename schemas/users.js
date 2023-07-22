@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const db = require("../models")
-const customJoi = Joi.extend(require("joi-phone-number"))
+const tools = require("../tools/commons.js")
 
 const registerUserSchema = Joi.object().keys({
     name: Joi.string()
@@ -25,13 +25,14 @@ const registerUserSchema = Joi.object().keys({
             "string.max": "{#label} should have a maximum length of {#limit}",
             "any.required": "{#label} is a required field"
           }),
-    phone_number: customJoi.string()
+    phone_number: Joi.string()
         .required()
-        .phoneNumber({
-            defaultCountry: "ID"
-        })
         .label("Phone Number")
         .external(async (data) => {
+            if (!tools.isIndonesianPhoneNumber(data)) {
+                throw new Joi.ValidationError("Not a valid Indonesian Phone Number")
+            }
+
             const getUser = await db.users.findOne({ 
                 where: { phoneNumber: data, is_deleted: false }
             });
@@ -39,6 +40,8 @@ const registerUserSchema = Joi.object().keys({
             if (getUser) {
                 throw new Joi.ValidationError("Phone number has been used")
             }
+
+            
 
         })
         .messages({

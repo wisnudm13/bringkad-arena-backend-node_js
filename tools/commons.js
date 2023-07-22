@@ -43,9 +43,19 @@ const isObjectEmpty = (object) => {
     return Object.keys(object).length === 0 && object.constructor == Object
 }
 
+const isIndonesianPhoneNumber = (phoneNumber) => {
+    format = /^(\+62|62|0)8[1-9][0-9]{6,9}$/
+    if (phoneNumber.match(format)) {
+        return true
+    }
+
+    return false
+}
+
 module.exports = {
     getHashPassword,
     checkHashPassword,
     generateAuthToken,
-    isObjectEmpty
+    isObjectEmpty,
+    isIndonesianPhoneNumber
 }
