@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Facility = sequelize.define("facilites", {
+  const FacilityItem = sequelize.define("facilites", {
       id: {
           type: DataTypes.INTEGER,
           allowNull: false,
@@ -15,20 +15,29 @@ module.exports = (sequelize, DataTypes) => {
           field: "deleted_at",
           type: DataTypes.DATE
       },
+      facilityID: {
+        field: "facility_id",
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model:"facilities",
+            key:"id"
+          },
+      },
       name: {
           type: DataTypes.STRING,
           allowNull: false,
           unique: true
       }, 
-      type: {
-          type: DataTypes.STRING,
-          allowNull: false,
+      startTime: {
+          type: DataTypes.TIME,
       },
-      description: {
-          type: DataTypes.STRING,
+      finishTime: {
+          type: DataTypes.TIME,
       },
-      status: {
-          type: DataTypes.STRING,
+      isActive: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: true
       },
 
   }, {
@@ -36,5 +45,5 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: "updated_at"
   });
 
-  return Facility
+  return FacilityItem
 }
