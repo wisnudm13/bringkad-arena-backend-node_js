@@ -39,9 +39,7 @@ const registerUserSchema = Joi.object().keys({
 
             if (getUser) {
                 throw new Joi.ValidationError("Phone number has been used")
-            }
-
-            
+            }    
 
         })
         .messages({
@@ -83,7 +81,52 @@ const loginUserSchema = Joi.object().keys({
         }),
 });
 
+const updateUserSchema = Joi.object().keys({
+    name: Joi.string()
+        .min(4)
+        .max(16)
+        .label("Name")
+        .messages({
+            "string.base": "{#label} should be a type of 'string ",
+            "string.min": "{#label} should have a minimum length of {#limit}",
+            "string.max": "{#label} should have a maximum length of {#limit}",
+        }),
+    phone_number: Joi.string()
+        .required()
+        .label("Phone Number")
+        .external(async (data) => {
+            if (!tools.isIndonesianPhoneNumber(data)) {
+                throw new Joi.ValidationError("Not a valid Indonesian Phone Number")
+            }
+
+        })
+        .messages({
+            "any.required": "{#label} is a required field",
+            "string.email": "{#label} is not a valid email address",
+            "string.empty": "{#label} cannot be empty",
+        }),
+    password: Joi.string()
+        .label("Password")
+        .optional()
+        .allow(null, ""),
+    confirm_password: Joi.any()
+        .when("password", {
+            is: Joi.any().valid(null, ""),
+            then: Joi.optional().allow(null, ""),
+            otherwise: Joi.required()
+        })
+        .equal(Joi.ref("password"))
+        .label("Confirm Password")
+        .messages({
+            "any.required": "{#label} is a required field",
+            "string.empty": "{#label} cannot be empty",
+            "any.only": "{{#label}} does not match with Password"
+        })
+
+})
+
 module.exports = { 
     registerUserSchema, 
-    loginUserSchema 
+    loginUserSchema,
+    updateUserSchema
 }

@@ -188,7 +188,7 @@ const deleteUserById = async (req, res) => {
     try {
         let id = req.params.user_id
 
-        // find admin by id
+        // find user by id
         let getUser = await db.users.findOne({ 
             where: { 
                 id: id,
@@ -255,10 +255,124 @@ const deleteUserById = async (req, res) => {
     }
 }
 
+const updateUserById = async (req, res) => {
+    try {
+        let id = req.params.user_id
+        let userData = []
+        let userCredData = {}
+
+        // find user by id
+        let getUser = await db.users.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
+
+        if (getUser == null) {
+            getUser = "No User found in given ID"
+
+            return res.status(400).json({
+                code: 400,
+                message: getUser,
+                data: {}
+            })
+        }
+
+        if (req.body.name != null) {
+            userData["name"] = req.body.name
+
+        }
+
+        if (req.body.phone_number != null) {
+            userData["phoneNumber"] = req.body.phone_number
+            
+            let checkUserPhoneNumber = await db.users.findOne({ 
+                where: { 
+                    isDeleted: {
+                        [Op.eq]: false
+                    }, 
+                    phoneNumber: {
+                        [Op.eq]: req.body.phone_number
+                    },
+                    [Op.not]: [
+                        { id: id }
+                    ]
+                    
+                },
+            })
+    
+            if (checkUserPhoneNumber != null) {
+                checkUserPhoneNumber = "Phone Number has been used"
+    
+                return res.status(400).json({
+                    code: 400,
+                    message: checkUserPhoneNumber,
+                    data: {}
+                })
+            }
+
+        }
+
+        if (req.body.password != null) {
+            if (req.body.confirm_password == null || 
+                req.body.password.trim() !== req.body.confirm_password.trim()
+            ) {
+                checkPassword = "Password and Confirm password does not match"
+
+                return res.status(400).json({
+                    code: 400,
+                    message: checkPassword,
+                    data: {}
+                })
+            }
+            const {salt, hashPassword} = await tools.getHashPassword(req.body.password)
+
+            userCredData["salt"] = salt
+            userCredData["password"] = hashPassword
+        }
+
+        if (!tools.isObjectEmpty(userData)) {
+            await db.users.update(userData, {
+                where: {
+                    id: getUser.id
+                }
+            });
+        }
+
+        if (!tools.isObjectEmpty(userCredData)) {
+            await db.user_credentials.update(userCredData, {
+                where: {
+                    userID: getUser.id
+                }
+            });
+        }
+
+
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully updated user",
+            data: {}
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when updating user, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when updating user",
+            errors: error
+        });
+    }
+
+}
+
 module.exports = {
     getUserById,
     getUserList,
     registerUser,
     loginUser,
-    deleteUserById
+    deleteUserById,
+    updateUserById
 }
