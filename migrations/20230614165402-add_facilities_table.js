@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('facilities', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -28,24 +28,22 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
-      uuid: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        unique: true
-      },
       name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-      }, 
-      phoneNumber: {
-        field: "phone_number",
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
-      
+      type: {
+        type: Sequelize.STRING
+      },
+      description: {
+        type: Sequelize.STRING
+      },
+      status: {
+        type: Sequelize.STRING,
+        defaultValue: "ACTIVE"
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('facilities');
   }
 };
