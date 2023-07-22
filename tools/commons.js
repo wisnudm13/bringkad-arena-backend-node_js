@@ -39,8 +39,13 @@ const generateAuthToken = async function(tokenPayload) {
     }
 }
 
+const isObjectEmpty = (object) => {
+    return Object.keys(object).length === 0 && object.constructor == Object
+}
+
 module.exports = {
     getHashPassword,
     checkHashPassword,
-    generateAuthToken
+    generateAuthToken,
+    isObjectEmpty
 }

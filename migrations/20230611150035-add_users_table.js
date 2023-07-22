@@ -39,8 +39,8 @@ module.exports = {
         unique: true
       }, 
       phoneNumber: {
-          field: "phone_number",
-          type: Sequelize.STRING,
+        field: "phone_number",
+        type: Sequelize.STRING,
       },
       
     });

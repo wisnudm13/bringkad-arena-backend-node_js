@@ -1,6 +1,6 @@
 const tools = require("../tools/commons.js")
 const db = require("../models")
-const { Op } = require("sequelize");
+const { Op, fn } = require("sequelize");
 const { errorLogger, appLogger } = require("../tools/loggers.js");
 
 const registerAdmin = async (req, res) => {
@@ -62,6 +62,7 @@ const loginAdmin = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Password or Username incorrect",
+                data: {}
             })
         }
 
@@ -75,6 +76,7 @@ const loginAdmin = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Password or Username incorrect",
+                data: {}
             })
         }
 
@@ -85,6 +87,7 @@ const loginAdmin = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Password or Username incorrect",
+                data: {}
             })
         };
 
@@ -100,6 +103,7 @@ const loginAdmin = async (req, res) => {
             return res.status(400).json({
                 code: 400,
                 message: "Login Error",
+                data: {}
             })
         };
 
@@ -124,6 +128,7 @@ const loginAdmin = async (req, res) => {
 
         return res.status(200).json({
             code: 200,
+            message: "OK",
             data: {
                 auth_token: authToken,
                 admin_id: admin.id,
@@ -144,47 +149,299 @@ const loginAdmin = async (req, res) => {
 }
 
 const getAdminList = async (req, res) => {
-    let adminList = await db.admins.findAll({
-        attributes: [
-            "id",
-            "username",
-            "email",
-            "is_active"
-        ]
-    })
+    try {
+        let adminList = await db.admins.findAll({ 
+            where: { 
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+            attributes: [
+                "id",
+                "username",
+                "email",
+                "is_active"
+            ]
+        })
+    
+    
+        return res.status(200).json({
+            code: 200,
+            message: "OK",
+            data: adminList
+        });
 
-    return res.status(200).json({
-        code: 200,
-        data: adminList
-    });
+    } catch (error) {
+        errorLogger.error("Error occured when getting list admin, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting list admin",
+            errors: error
+        });
+    }
 }
 
 const getAdminById = async (req, res) => {
-    let id = req.params.admin_id
+    try {
+        let id = req.params.admin_id
+        let statusCode = 200
 
-    let getAdmin = await db.admins.findOne({ 
-        where: { id: id },
-        attributes: [
-            "id",
-            "username",
-            "email",
-            "is_active"
-        ]
-    })
+        let getAdmin = await db.admins.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+            attributes: [
+                "id",
+                "username",
+                "email",
+                "is_active"
+            ]
+        })
 
-    if (getAdmin == null) {
-        getAdmin = "No Admin found in given ID"
+        if (getAdmin == null) {
+            getAdmin = "No Admin found in given ID"
+            statusCode = 400
+        }
+
+        return res.status(statusCode).json({
+            code: statusCode,
+            message: "OK",
+            data: getAdmin
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when getting admin data, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting admin data",
+            errors: error
+        });
+    }
+}
+
+const deleteAdminById = async (req, res) => {
+    try {
+        let id = req.params.admin_id
+
+        // find admin by id
+        let getAdmin = await db.admins.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+            attributes: [
+                "id",
+                "username",
+                "email",
+                "is_active"
+            ]
+        })
+
+        if (getAdmin == null) {
+            getAdmin = "No Admin found in given ID"
+
+            return res.status(400).json({
+                code: 400,
+                message: getAdmin,
+                data: {}
+            })
+        }
+
+        // update is_deleted in admin
+        await db.admins.update({
+            isActive: false,
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                id: getAdmin.id
+            }
+        });
+
+        // update is_deleted in admin_credentials
+        await db.admin_credentials.update({
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                adminID: getAdmin.id
+            }
+        });
+
+        // expire all token in db
+        await db.tokens.update({
+            isActive: false,
+            isDeleted: true,
+        }, {
+            where: {
+                adminID: getAdmin.id
+            }
+        });
+
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully deleted admin",
+            data: {}
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when deleting admin, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when deleting admin",
+            errors: error
+        });
+    }
+}
+
+const updateAdminById = async (req, res) => {
+    try {
+        let id = req.params.admin_id
+        let adminData = []
+        let adminCredData = {}
+
+        // find admin by id
+        let getAdmin = await db.admins.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
+
+        if (getAdmin == null) {
+            getAdmin = "No Admin found in given ID"
+
+            return res.status(400).json({
+                code: 400,
+                message: getAdmin,
+                data: {}
+            })
+        }
+
+        if (req.body.username != null) {
+            adminData["username"] = req.body.username
+            
+            let checkAdminUsername = await db.admins.findOne({ 
+                where: { 
+                    isDeleted: {
+                        [Op.eq]: false
+                    }, 
+                    username: {
+                        [Op.eq]: req.body.username
+                    },
+                    [Op.not]: [
+                        { id: id }
+                    ]
+                    
+                },
+            })
+    
+            if (checkAdminUsername != null) {
+                checkAdminUsername = "Username has been used"
+    
+                return res.status(400).json({
+                    code: 400,
+                    message: checkAdminUsername,
+                    data: {}
+                })
+            }
+
+        }
+
+        if (req.body.email != null) {
+            adminData["email"] = req.body.email
+            
+            let checkAdminEmail = await db.admins.findOne({ 
+                where: { 
+                    isDeleted: {
+                        [Op.eq]: false
+                    }, 
+                    email: {
+                        [Op.eq]: req.body.email
+                    },
+                    [Op.not]: [
+                        { id: id }
+                    ]
+                    
+                },
+            })
+    
+            if (checkAdminEmail != null) {
+                checkAdminEmail = "Email has been used"
+    
+                return res.status(400).json({
+                    code: 400,
+                    message: checkAdminEmail,
+                    data: {}
+                })
+            }
+
+        }
+
+        if (req.body.password != null) {
+            if (req.body.confirm_password == null || 
+                req.body.password.trim() !== req.body.confirm_password.trim()
+            ) {
+                checkPassword = "Password and Confirm password does not match"
+
+                return res.status(400).json({
+                    code: 400,
+                    message: checkPassword,
+                    data: {}
+                })
+            }
+            const {salt, hashPassword} = await tools.getHashPassword(req.body.password)
+
+            adminCredData["salt"] = salt
+            adminCredData["password"] = hashPassword
+        }
+
+        if (!tools.isObjectEmpty(adminData)) {
+            await db.admins.update(adminData, {
+                where: {
+                    id: getAdmin.id
+                }
+            });
+        }
+
+        if (!tools.isObjectEmpty(adminCredData)) {
+            await db.admin_credentials.update(adminCredData, {
+                where: {
+                    adminID: getAdmin.id
+                }
+            });
+        }
+
+
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully updated admin",
+            data: {}
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when updating admin, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when updating admin",
+            errors: error
+        });
     }
 
-    return res.status(200).json({
-        code: 200,
-        data: getAdmin
-    })
 }
 
 module.exports = {
     getAdminById,
     getAdminList,
     registerAdmin,
-    loginAdmin
+    loginAdmin,
+    deleteAdminById,
+    updateAdminById
 }
