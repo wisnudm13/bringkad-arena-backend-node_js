@@ -13,8 +13,10 @@ userRouter.post("/login",
 )
 
 // protected API
-userRouter.get("/list", authValidator("admin"), userController.getUserList)
-userRouter.get("/:user_id", authValidator("admin"), userController.getUserById)
-userRouter.get("/profile", authValidator("user"), userController.getUserById)
+userRouter.get("/list", authValidator("user"), userController.getUserList)
+userRouter.get("/:user_id", authValidator("user"), userController.getUserById)
+// userRouter.put("/:user_id", 
+//     [authValidator("user"), schemaValidator(updateAdminSchema)], userController.updateAdminById)
+userRouter.delete("/:user_id", authValidator("admin"), userController.deleteUserById)
 
 module.exports = userRouter

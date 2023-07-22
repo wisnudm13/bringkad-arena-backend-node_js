@@ -1,6 +1,6 @@
 const tools = require("../tools/commons.js")
 const db = require("../models")
-const { Op } = require("sequelize");
+const { Op, fn } = require("sequelize");
 const { errorLogger, appLogger } = require("../tools/loggers.js");
 
 const registerUser = async (req, res) => {
@@ -184,9 +184,81 @@ const getUserById = async (req, res) => {
     })
 }
 
+const deleteUserById = async (req, res) => {
+    try {
+        let id = req.params.user_id
+
+        // find admin by id
+        let getUser = await db.users.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
+
+        if (getUser == null) {
+            getUser = "No User found in given ID"
+
+            return res.status(400).json({
+                code: 400,
+                message: getUser,
+                data: {}
+            })
+        }
+
+        // update is_deleted in user
+        await db.users.update({
+            isActive: false,
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                id: getUser.id
+            }
+        });
+
+        // update is_deleted in user_credentials
+        await db.user_credentials.update({
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                userID: getUser.id
+            }
+        });
+
+        // expire all token in db
+        await db.tokens.update({
+            isActive: false,
+            isDeleted: true,
+        }, {
+            where: {
+                userID: getUser.id
+            }
+        });
+
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully deleted user",
+            data: {}
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when deleting user, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when deleting user",
+            errors: error
+        });
+    }
+}
+
 module.exports = {
     getUserById,
     getUserList,
     registerUser,
-    loginUser
+    loginUser,
+    deleteUserById
 }
