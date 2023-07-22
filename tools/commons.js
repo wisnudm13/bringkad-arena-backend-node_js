@@ -45,11 +45,16 @@ const isObjectEmpty = (object) => {
 
 const isIndonesianPhoneNumber = (phoneNumber) => {
     format = /^(\+62|62|0)8[1-9][0-9]{6,9}$/
+
     if (phoneNumber.match(format)) {
         return true
     }
 
     return false
+}
+
+const convertToBase64 = (file) => {
+    return file.buffer.toString("base64")
 }
 
 module.exports = {

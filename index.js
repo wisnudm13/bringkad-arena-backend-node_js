@@ -6,6 +6,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const adminRouter = require("./routes/adminRoutes.js");
 const tokenRouter = require("./routes/tokenRoutes.js");
 const userRouter = require("./routes/userRoutes.js");
+const facilityRouter = require('./routes/facilityRoutes.js')
 const db = require("./models");
 const { errorLogger, appLogger } = require("./tools/loggers");
 
@@ -49,6 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/v1/admins/", adminRouter)
 app.use("/v1/tokens/", tokenRouter)
 app.use("/v1/users/", userRouter)
+app.use("/v1/facilities/", facilityRouter)
 app.use("/v1/api-docs/", swaggerUI.serve, swaggerUI.setup(swaggerSpec))
 
 app.get("/", (req, res) => {
@@ -69,9 +71,4 @@ db.sequelize.authenticate()
 .catch(error => {
   errorLogger.error("Error starting server " + error)
 })
-
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}.`);
-//   });
-
   
