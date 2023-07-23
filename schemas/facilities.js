@@ -66,10 +66,27 @@ const getListFacilitySchema = Joi.object().keys({
         }),
     status: Joi.string()
         .uppercase()
+        .optional()
+        .allow(null, "")
         .label("Facility Status")
         .external(async (data) => {
-            if (!Object.values(facilityStatus).includes(data)) {
+            if (data && !Object.values(facilityStatus).includes(data)) {
                 throw new Joi.ValidationError("Not a valid Facility Status")
+            }
+
+        })
+        .messages({
+            "any.required": "{#label} is a required field",
+            "string.empty": "{#label} cannot be empty",
+        }),
+    type: Joi.string()
+        .uppercase()
+        .label("Facility Type")
+        .optional()
+        .allow(null, "")
+        .external(async (data) => {
+            if (data && !Object.values(facilityType).includes(data)) {
+                throw new Joi.ValidationError("Not a valid Facility Type")
             }
 
         })

@@ -53,6 +53,10 @@ const getFacilityList = async (req, res) => {
             queryFilter.status = req.query.status
         }
 
+        if (req.query.type) {
+            queryFilter.type = req.query.type
+        }
+
         const {offset, limit} = tools.validateOffsetLimit(
             parseInt(req.query.page), parseInt(req.query.per_page)
         )
