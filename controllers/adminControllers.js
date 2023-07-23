@@ -150,12 +150,22 @@ const loginAdmin = async (req, res) => {
 
 const getAdminList = async (req, res) => {
     try {
-        let adminList = await db.admins.findAll({ 
-            where: { 
-                isDeleted: {
-                    [Op.eq]: false
-                }, 
+        let queryFilter = {
+            isDeleted: {
+                [Op.eq]: false
             },
+        }
+
+        const {offset, limit} = tools.validateOffsetLimit(
+            parseInt(req.query.page), parseInt(req.query.per_page)
+        )
+
+        let adminDataCount = await db.admins.count({where: queryFilter})
+
+        let adminList = await db.admins.findAll({ 
+            offset: offset,
+            limit: limit,
+            where: queryFilter,
             attributes: [
                 "id",
                 "username",
@@ -163,13 +173,19 @@ const getAdminList = async (req, res) => {
                 "is_active"
             ]
         })
-    
-    
+
+        let responseData = {
+            page: parseInt(req.query.page),
+            per_page: parseInt(req.query.per_page),
+            total_data: adminDataCount,
+            list_data: adminList
+        }
+
         return res.status(200).json({
             code: 200,
             message: "OK",
-            data: adminList
-        });
+            data: responseData
+        })
 
     } catch (error) {
         errorLogger.error("Error occured when getting list admin, error: " + error)
