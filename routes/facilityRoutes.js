@@ -21,8 +21,12 @@ facilityRouter.get("/list",
     [authValidator("admin"), schemaValidator(facilitySchema.getListFacilitySchema)],
     facilityController.getFacilityList
 )
+facilityRouter.put("/:facility_id", 
+    [authValidator("admin"), schemaValidator(facilitySchema.updateFacilitySchema)],
+    facilityController.updateFacilityById
+)
+
 // facilityRouter.get("/:facility_id")
-// facilityRouter.put("/:facility_id")
 // facilityRouter.delete("/:facility_id")
 // facilityRouter.post("/:facility_id/upload")
 

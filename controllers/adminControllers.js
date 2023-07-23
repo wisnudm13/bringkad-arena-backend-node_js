@@ -318,7 +318,7 @@ const deleteAdminById = async (req, res) => {
 const updateAdminById = async (req, res) => {
     try {
         let id = req.params.admin_id
-        let adminData = []
+        let adminData = {}
         let adminCredData = {}
 
         // find admin by id

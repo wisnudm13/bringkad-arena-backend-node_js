@@ -308,7 +308,7 @@ const deleteUserById = async (req, res) => {
 const updateUserById = async (req, res) => {
     try {
         let id = req.params.user_id
-        let userData = []
+        let userData = {}
         let userCredData = {}
 
         // find user by id

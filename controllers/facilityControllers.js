@@ -203,21 +203,6 @@ const getFacilityList = async (req, res) => {
     
 // }
 
-// const getUserList = async (req, res) => {
-//     let userList = await db.users.findAll({
-//         attributes: [
-//             "id",
-//             "name",
-//             "phone_number",
-//         ]
-//     })
-
-//     return res.status(200).json({
-//         code: 200,
-//         message: "OK",
-//         data: userList
-//     });
-// }
 
 // const getUserById = async (req, res) => {
 //     let id = req.params.user_id
@@ -313,121 +298,74 @@ const getFacilityList = async (req, res) => {
 //     }
 // }
 
-// const updateUserById = async (req, res) => {
-//     try {
-//         let id = req.params.user_id
-//         let userData = []
-//         let userCredData = {}
+const updateFacilityById = async (req, res) => {
+    try {
+        let id = req.params.facility_id
+        let facilityData = {}
 
-//         // find user by id
-//         let getUser = await db.users.findOne({ 
-//             where: { 
-//                 id: id,
-//                 isDeleted: {
-//                     [Op.eq]: false
-//                 }, 
-//             },
-//         })
+        // find facility by id
+        let getFacility = await db.facilities.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
 
-//         if (getUser == null) {
-//             getUser = "No User found in given ID"
+        if (getFacility == null) {
+            getFacility = "No Facility found in given ID"
 
-//             return res.status(400).json({
-//                 code: 400,
-//                 message: getUser,
-//                 data: {}
-//             })
-//         }
+            return res.status(400).json({
+                code: 400,
+                message: getFacility,
+                data: {}
+            })
+        }
 
-//         if (req.body.name != null) {
-//             userData["name"] = req.body.name
+        if (req.body.name != null) {
+            facilityData["name"] = req.body.name
 
-//         }
+        }
 
-//         if (req.body.phone_number != null) {
-//             userData["phoneNumber"] = req.body.phone_number
-            
-//             let checkUserPhoneNumber = await db.users.findOne({ 
-//                 where: { 
-//                     isDeleted: {
-//                         [Op.eq]: false
-//                     }, 
-//                     phoneNumber: {
-//                         [Op.eq]: req.body.phone_number
-//                     },
-//                     [Op.not]: [
-//                         { id: id }
-//                     ]
-                    
-//                 },
-//             })
-    
-//             if (checkUserPhoneNumber != null) {
-//                 checkUserPhoneNumber = "Phone Number has been used"
-    
-//                 return res.status(400).json({
-//                     code: 400,
-//                     message: checkUserPhoneNumber,
-//                     data: {}
-//                 })
-//             }
+        if (req.body.status != null) {
+            facilityData["status"] = req.body.status
 
-//         }
+        }
 
-//         if (req.body.password != null) {
-//             if (req.body.confirm_password == null || 
-//                 req.body.password.trim() !== req.body.confirm_password.trim()
-//             ) {
-//                 checkPassword = "Password and Confirm password does not match"
+        if (req.body.description != null) {
+            facilityData["description"] = req.body.description
 
-//                 return res.status(400).json({
-//                     code: 400,
-//                     message: checkPassword,
-//                     data: {}
-//                 })
-//             }
-//             const {salt, hashPassword} = await tools.getHashPassword(req.body.password)
+        }
 
-//             userCredData["salt"] = salt
-//             userCredData["password"] = hashPassword
-//         }
+        if (!tools.isObjectEmpty(facilityData)) {
+            await db.facilities.update(facilityData, {
+                where: {
+                    id: getFacility.id
+                }
+            });
+        }
 
-//         if (!tools.isObjectEmpty(userData)) {
-//             await db.users.update(userData, {
-//                 where: {
-//                     id: getUser.id
-//                 }
-//             });
-//         }
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully updated facility",
+            data: {}
+        })
 
-//         if (!tools.isObjectEmpty(userCredData)) {
-//             await db.user_credentials.update(userCredData, {
-//                 where: {
-//                     userID: getUser.id
-//                 }
-//             });
-//         }
+    } catch (error) {
+        errorLogger.error("Error occured when updating facility, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when updating facility",
+            errors: error
+        });
+    }
 
-
-//         return res.status(200).json({
-//             code: 200,
-//             message: "Successfully updated user",
-//             data: {}
-//         })
-
-//     } catch (error) {
-//         errorLogger.error("Error occured when updating user, error: " + error)
-//         return res.status(400).json({
-//             code: 400,
-//             message: "Error occured when updating user",
-//             errors: error
-//         });
-//     }
-
-// }
+}
 
 module.exports = {
     createFacility,
     addFacilityItem,
-    getFacilityList
+    getFacilityList,
+    updateFacilityById
 }
