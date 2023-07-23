@@ -1,9 +1,21 @@
-const Joi = require('joi');
-const { errorLogger } = require('./loggers');
+const Joi = require("joi");
+const { errorLogger } = require("./loggers.js");
+const { isObjectEmpty } = require("../tools/commons.js")
 
 const schemaValidator = (schema) => async function(req, res, next) {
     try {
-        await schema.validateAsync(req.body);
+        let data = {}
+
+        if (!isObjectEmpty(req.body)) {
+            Object.assign(data, req.body)
+
+        }
+
+        if (!isObjectEmpty(req.query)) {
+            Object.assign(data, req.query)
+        }
+
+        await schema.validateAsync(data);
         next();
 
     } catch (error) {
