@@ -125,8 +125,28 @@ const updateUserSchema = Joi.object().keys({
 
 })
 
+const getListUserSchema = Joi.object().keys({
+    page: Joi.number()
+        .default(1)
+        .min(1)
+        .label("Page")
+        .messages({
+            "number.base": "{#label} should be a type of 'int' ",
+            "number.min": "{#label} should have a minimum length of {#limit}",
+          }),
+    per_page: Joi.number()
+        .default(10)
+        .min(10)
+        .label("Per page")
+        .messages({
+            "number.base": "{#label} should be a type of 'int' ",
+            "number.min": "{#label} should have a minimum length of {#limit}",
+        }),
+});
+
 module.exports = { 
     registerUserSchema, 
     loginUserSchema,
-    updateUserSchema
+    updateUserSchema,
+    getListUserSchema
 }

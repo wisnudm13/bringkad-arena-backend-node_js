@@ -147,25 +147,41 @@ const loginUser = async (req, res) => {
 
 const getUserList = async (req, res) => {
     try {
-        let userList = await db.users.findAll({ 
-            where: { 
-                isDeleted: {
-                    [Op.eq]: false
-                }, 
+        let queryFilter = {
+            isDeleted: {
+                [Op.eq]: false
             },
+        }
+
+        const {offset, limit} = tools.validateOffsetLimit(
+            parseInt(req.query.page), parseInt(req.query.per_page)
+        )
+
+        let userDataCount = await db.users.count({where: queryFilter})
+
+        let userList = await db.users.findAll({ 
+            offset: offset,
+            limit: limit,
+            where: queryFilter,
             attributes: [
                 "id",
                 "name",
                 "phone_number",
             ]
         })
-    
-    
+
+        let responseData = {
+            page: parseInt(req.query.page),
+            per_page: parseInt(req.query.per_page),
+            total_data: userDataCount,
+            list_data: userList
+        }
+
         return res.status(200).json({
             code: 200,
             message: "OK",
-            data: userList
-        });
+            data: responseData
+        })
 
     } catch (error) {
         errorLogger.error("Error occured when getting list user, error: " + error)
