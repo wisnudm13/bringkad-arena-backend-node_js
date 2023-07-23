@@ -57,10 +57,30 @@ const convertToBase64 = (file) => {
     return file.buffer.toString("base64")
 }
 
+const validateOffsetLimit = (page, perPage) => {
+    let offset = 0
+    let limit = 10
+
+    if (page != null && perPage != null) {
+        limit = perPage
+
+        if (page > 0) {
+            offset = (page - 1) * perPage
+        }
+        
+    }
+
+    return {
+        offset: offset,
+        limit: limit,
+    }
+}
+
 module.exports = {
     getHashPassword,
     checkHashPassword,
     generateAuthToken,
     isObjectEmpty,
-    isIndonesianPhoneNumber
+    isIndonesianPhoneNumber,
+    validateOffsetLimit
 }

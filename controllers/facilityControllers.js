@@ -31,7 +31,69 @@ const createFacility = async (req, res) => {
             errors: error
         });
     }
-}   
+} 
+
+const addFacilityItem = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+const getFacilityList = async (req, res) => {
+    try {
+        let queryFilter = {
+            isDeleted: {
+                [Op.eq]: false
+            },
+        }
+
+        if (req.query.status) {
+            queryFilter.status = req.query.status
+        }
+
+        const {offset, limit} = tools.validateOffsetLimit(
+            parseInt(req.query.page), parseInt(req.query.per_page)
+        )
+
+        let facilityDataCount = await db.facilities.count({where: queryFilter})
+
+        let facilityList = await db.facilities.findAll({ 
+            offset: offset,
+            limit: limit,
+            where: queryFilter,
+            attributes: [
+                "id",
+                "name",
+                "type",
+                "description",
+                "status"
+            ],
+        })
+
+        let responseData = {
+            page: parseInt(req.query.page),
+            per_page: parseInt(req.query.per_page),
+            total_data: facilityDataCount,
+            list_data: facilityList
+        }
+
+        return res.status(200).json({
+            code: 200,
+            message: "OK",
+            data: responseData
+        })
+        
+    } catch (error) {
+        errorLogger.error("Error occured when getting list facility, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting list facility",
+            errors: error
+        });
+    }
+}
 
 // const loginUser = async (req, res) => {
 //     try {
@@ -361,5 +423,7 @@ const createFacility = async (req, res) => {
 // }
 
 module.exports = {
-    createFacility
+    createFacility,
+    addFacilityItem,
+    getFacilityList
 }

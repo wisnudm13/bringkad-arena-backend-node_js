@@ -11,9 +11,35 @@ const upload = multer()
 //     [upload.single("file"), authValidator("admin"), schemaValidator(facilitySchema.createFacilitySchema)], 
 //     facilityController.createFacility
 // )
+
+// facility
 facilityRouter.post("/create", 
-    [authValidator("admin"), schemaValidator(facilitySchema.createFacilitySchema)], facilityController.createFacility
+    [authValidator("admin"), schemaValidator(facilitySchema.createFacilitySchema)], 
+    facilityController.createFacility
 )
+facilityRouter.get("/list", 
+    [authValidator("admin"), schemaValidator(facilitySchema.getListFacilitySchema)],
+    facilityController.getFacilityList
+)
+// facilityRouter.get("/:facility_id")
+// facilityRouter.put("/:facility_id")
+// facilityRouter.delete("/:facility_id")
+// facilityRouter.post("/:facility_id/upload")
+
+// // facility item
+// facilityRouter.post("/item/create", 
+//     [authValidator("admin"), schemaValidator(facilitySchema.addFacilityItemSchema)], 
+//     facilityController.addFacilityItem
+// )
+// facilityRouter.put("/item/:facility_item_id", 
+//     [authValidator("admin"), schemaValidator(facilitySchema.addFacilityItemSchema)], 
+//     facilityController.addFacilityItem
+// )
+// facilityRouter.delete("/item/:facility_item_id", 
+//     [authValidator("admin"), schemaValidator(facilitySchema.addFacilityItemSchema)], 
+//     facilityController.addFacilityItem
+// )
+
 
 // facilityRouter.put("/item/:facility_item_id",
 //     [schemaValidator(loginAdminSchema)], facilityController.loginAdmin
