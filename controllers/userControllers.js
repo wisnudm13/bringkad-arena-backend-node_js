@@ -146,42 +146,76 @@ const loginUser = async (req, res) => {
 }
 
 const getUserList = async (req, res) => {
-    let userList = await db.users.findAll({
-        attributes: [
-            "id",
-            "name",
-            "phone_number",
-        ]
-    })
+    try {
+        let userList = await db.users.findAll({ 
+            where: { 
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+            attributes: [
+                "id",
+                "name",
+                "phone_number",
+            ]
+        })
+    
+    
+        return res.status(200).json({
+            code: 200,
+            message: "OK",
+            data: userList
+        });
 
-    return res.status(200).json({
-        code: 200,
-        message: "OK",
-        data: userList
-    });
+    } catch (error) {
+        errorLogger.error("Error occured when getting list user, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting list user",
+            errors: error
+        });
+    }
 }
 
 const getUserById = async (req, res) => {
-    let id = req.params.user_id
+    try {
+        let id = req.params.user_id
+        let statusCode = 200
 
-    let getUser = await db.users.findOne({ 
-        where: { id: id },
-        attributes: [
-            "id",
-            "name",
-            "phone_number",
-        ]
-    })
+        let getUser = await db.users.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+            attributes: [
+                "id",
+                "name",
+                "phone_number",
+            ]
+        })
 
-    if (getUser == null) {
-        getUser = "No User found in given ID"
+        if (getUser == null) {
+            getUser = "No User found in given ID"
+            statusCode = 400
+        }
+
+        return res.status(statusCode).json({
+            code: statusCode,
+            message: "OK",
+            data: getUser
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when getting user data, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting user data",
+            errors: error
+        });
     }
 
-    return res.status(200).json({
-        code: 200,
-        message: "OK",
-        data: getUser
-    })
 }
 
 const deleteUserById = async (req, res) => {
