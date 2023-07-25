@@ -2,7 +2,8 @@ const tools = require("../tools/commons.js")
 const db = require("../models")
 const { Op, fn } = require("sequelize");
 const { errorLogger, appLogger } = require("../tools/loggers.js");
-const { facilityType, facilityStatus } = require("../tools/enums")
+const { facilityType, facilityStatus } = require("../tools/enums");
+const { date } = require("joi");
 
 const createFacility = async (req, res) => {
     try {
@@ -36,10 +37,197 @@ const createFacility = async (req, res) => {
 
 const addFacilityItem = async (req, res) => {
     try {
-        
+        if (req.body.facility_id) {
+            let getFacility = await db.facilities.findOne({ 
+                where: { 
+                    id: req.body.facility_id,
+                    isDeleted: {
+                        [Op.eq]: false
+                    }, 
+                },
+            })
+
+            if (getFacility == null) {
+                getFacility = "No Facility found in given ID"
+    
+                return res.status(400).json({
+                    code: 400,
+                    message: getFacility,
+                    data: {}
+                })
+            }
+            
+            // validate request body
+            const {checkStatus, checkResponse} = await validateAddFacilityItem(getFacility, req.body)
+
+            if (!checkStatus) {
+                return res.status(400).json({
+                    code: 400,
+                    message: checkResponse,
+                    data: {}
+                })
+            }
+            
+            let data = {}
+            let facilityName = ""
+
+            if (req.body.name == null) {
+                facilityName = req.body.start_time.concat(" - ", req.body.finish_time)
+
+            } else {
+                facilityName = req.body.name
+            }
+
+            data.facilityID = getFacility.id
+            data.name = facilityName
+            
+            if (req.body.start_time != null) {
+                data.startTime = req.body.start_time
+            } 
+
+            if (req.body.finish_time != null) {
+                data.finishTime = req.body.finish_time
+            }
+
+            const facilityItem = await db.facility_items.create(data)
+
+            return res.status(200).json({
+                code: 200,
+                message: "Successfully created facility item",
+                data: facilityItem
+            })
+
+        }
+
+
     } catch (error) {
-        
+        errorLogger.error("Error occured when adding facility item, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when adding facility item",
+            errors: error
+        });
     }
+}
+
+const validateAddFacilityItem = async function (facilityData, requestBody) {
+    let errorMessage = ""
+
+    switch (facilityData.type) {
+        case "SPORT":
+            if (requestBody.start_time == null || requestBody.finish_time == null) {
+                errorMessage = "Start time and Finish time is required for SPORT facility"
+
+                return {
+                    checkStatus: false,
+                    checkResponse: errorMessage
+                }
+            }
+
+            if (requestBody.start_time >= requestBody.finish_time) {
+                errorMessage = "Finish time must be greater than start time"
+
+                return {
+                    checkStatus: false,
+                    checkResponse: errorMessage
+                }
+            }
+            
+            const getFacilityItemList = await db.facility_items.findAll({
+                where: {
+                    isDeleted: {
+                        [Op.eq]: false
+                    },
+                    facilityID: facilityData.id
+                }
+            })
+
+            if (getFacilityItemList != null) {
+                let today = new Date()
+                let splitNewStartTime = requestBody.start_time.split(":")
+                let splitNewFinishTime = requestBody.finish_time.split(":")
+                let newStartTime = (
+                    new Date(
+                        today.getFullYear(), 
+                        today.getMonth(), 
+                        today.getDate(), 
+                        splitNewStartTime[0], 
+                        splitNewStartTime[1], 
+                        "00"
+                    )
+                )
+                let newFinishTime = (
+                    new Date(
+                        today.getFullYear(), 
+                        today.getMonth(), 
+                        today.getDate(), 
+                        splitNewFinishTime[0], 
+                        splitNewFinishTime[1], 
+                        "00"
+                    )
+                )
+
+                for (let i = 0; i < getFacilityItemList.length; i++)  {
+                    rowData = getFacilityItemList[i].dataValues
+                    let splitStartTime = requestBody.start_time.split(":")
+                    let splitFinishTime = requestBody.finish_time.split(":")
+
+                    let startTime = new Date(
+                        today.getFullYear(), 
+                        today.getMonth(), 
+                        today.getDate(), 
+                        splitStartTime[0], 
+                        splitStartTime[1], 
+                        "00"
+                    )
+
+                    let finishTime = new Date(
+                        today.getFullYear(), 
+                        today.getMonth(), 
+                        today.getDate(), 
+                        splitFinishTime[0], 
+                        splitFinishTime[1], 
+                        "00"
+                    )
+
+                    if ((startTime == newStartTime && finishTime == newFinishTime) || 
+                        (finishTime > newStartTime && finishTime <= newFinishTime)) {
+                            errorMessage = "Start time or Finish time is invalid"
+
+                            return {
+                                checkStatus: false,
+                                checkResponse: errorMessage
+                            }
+                        }
+
+                  }
+            }
+
+            return {
+                checkStatus: true,
+                checkResponse: {}
+            }
+
+        case "INN":
+            if (requestBody.name == null) {
+                errorMessage = "Name is required"
+
+                return {
+                    checkStatus: false,
+                    checkResponse: errorMessage
+                }
+            }
+
+            return {
+                checkStatus: true,
+                checkResponse: {}
+            }
+    
+        default:
+            break;
+
+    }
+
 }
 
 const getFacilityList = async (req, res) => {

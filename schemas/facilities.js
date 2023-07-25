@@ -112,7 +112,6 @@ const addFacilityItemSchema = Joi.object().keys({
             "any.required": "{#label} is a required field",
         }),
     name: Joi.string()
-        .required()
         .min(4)
         .label("Facility Item Name")
         .messages({
@@ -121,6 +120,14 @@ const addFacilityItemSchema = Joi.object().keys({
             "any.required": "{#label} is a required field"
         }),
     start_time: Joi.string()
+        .optional()
+        .allow(null, ""),
+    finish_time: Joi.any()
+        .when("start_time", {
+            is: Joi.any().valid(null, ""),
+            then: Joi.optional().allow(null, ""),
+            otherwise: Joi.required()
+        })
 })
 
 const updateFacilitySchema = Joi.object().keys({

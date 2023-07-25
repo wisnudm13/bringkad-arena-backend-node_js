@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const FacilityItem = sequelize.define("facilites", {
+  const FacilityItem = sequelize.define("facility_items", {
       id: {
           type: DataTypes.INTEGER,
           allowNull: false,
@@ -25,19 +25,22 @@ module.exports = (sequelize, DataTypes) => {
           },
       },
       name: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          unique: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
       }, 
       startTime: {
-          type: DataTypes.TIME,
+        field: "start_time",
+        type: DataTypes.TIME,
       },
       finishTime: {
-          type: DataTypes.TIME,
+        field: "finish_time",
+        type: DataTypes.TIME,
       },
       isActive: {
-          type: DataTypes.BOOLEAN,
-          defaultValue: true
+        field: "is_active",
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
       },
 
   }, {
