@@ -25,16 +25,19 @@ facilityRouter.put("/:facility_id",
     [authValidator("admin"), schemaValidator(facilitySchema.updateFacilitySchema)],
     facilityController.updateFacilityById
 )
+facilityRouter.get("/type/list", facilityController.getFacilityType)
+
+facilityRouter.get("/status/list", facilityController.getFacilityStatus)
 
 // facilityRouter.get("/:facility_id")
 // facilityRouter.delete("/:facility_id")
 // facilityRouter.post("/:facility_id/upload")
 
-// // facility item
-// facilityRouter.post("/item/create", 
-//     [authValidator("admin"), schemaValidator(facilitySchema.addFacilityItemSchema)], 
-//     facilityController.addFacilityItem
-// )
+// facility item
+facilityRouter.post("/item/create", 
+    [authValidator("admin"), schemaValidator(facilitySchema.addFacilityItemSchema)], 
+    facilityController.addFacilityItem
+)
 // facilityRouter.put("/item/:facility_item_id", 
 //     [authValidator("admin"), schemaValidator(facilitySchema.addFacilityItemSchema)], 
 //     facilityController.addFacilityItem

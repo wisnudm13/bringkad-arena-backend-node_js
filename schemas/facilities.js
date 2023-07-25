@@ -25,10 +25,9 @@ const createFacilitySchema = Joi.object().keys({
           }),
     type: Joi.string()
         .required()
-        .uppercase()
         .label("Facility Type")
         .external(async (data) => {
-            if (!Object.values(facilityType).includes(data)) {
+            if (!(facilityType.hasOwnProperty(data))) {
                 throw new Joi.ValidationError("Not a valid Facility Type")
             }
 
@@ -65,12 +64,11 @@ const getListFacilitySchema = Joi.object().keys({
             "number.min": "{#label} should have a minimum length of {#limit}",
         }),
     status: Joi.string()
-        .uppercase()
         .optional()
         .allow(null, "")
         .label("Facility Status")
         .external(async (data) => {
-            if (data && !Object.values(facilityStatus).includes(data)) {
+            if (data && !(facilityStatus.hasOwnProperty(data))) {
                 throw new Joi.ValidationError("Not a valid Facility Status")
             }
 
@@ -80,12 +78,11 @@ const getListFacilitySchema = Joi.object().keys({
             "string.empty": "{#label} cannot be empty",
         }),
     type: Joi.string()
-        .uppercase()
         .label("Facility Type")
         .optional()
         .allow(null, "")
         .external(async (data) => {
-            if (data && !Object.values(facilityType).includes(data)) {
+            if (data && !(facilityType.hasOwnProperty(data))) {
                 throw new Joi.ValidationError("Not a valid Facility Type")
             }
 
@@ -97,7 +94,33 @@ const getListFacilitySchema = Joi.object().keys({
 });
 
 const addFacilityItemSchema = Joi.object().keys({
-    
+    facility_id: Joi.number()
+        .label("Facility ID")
+        .required()
+        .external(async (data) => {
+            const getFacility = await db.facilities.findOne({ 
+                where: { id: data, is_deleted: false }
+            });
+
+            if (!getFacility) {
+                throw new Joi.ValidationError("Facility not found")
+            }
+
+        })
+        .messages({
+            "number.base": "{#label} should be a type of 'int' ",
+            "any.required": "{#label} is a required field",
+        }),
+    name: Joi.string()
+        .required()
+        .min(4)
+        .label("Facility Item Name")
+        .messages({
+            "string.base": "{#label} should be a type of 'string ",
+            "string.empty": "{#label} cannot be empty",
+            "any.required": "{#label} is a required field"
+        }),
+    start_time: Joi.string()
 })
 
 const updateFacilitySchema = Joi.object().keys({

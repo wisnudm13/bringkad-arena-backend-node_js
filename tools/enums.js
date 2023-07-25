@@ -1,11 +1,11 @@
 const facilityStatus = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
+    ACTIVE: "Active",
+    INACTIVE: "Inactive"
 }
 
 const facilityType = {
-    SPORT: "SPORT",
-    INN: "INN"
+    SPORT: "Sport",
+    INN: "Inn"
 }
 
 module.exports = {

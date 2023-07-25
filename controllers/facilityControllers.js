@@ -2,6 +2,7 @@ const tools = require("../tools/commons.js")
 const db = require("../models")
 const { Op, fn } = require("sequelize");
 const { errorLogger, appLogger } = require("../tools/loggers.js");
+const { facilityType, facilityStatus } = require("../tools/enums")
 
 const createFacility = async (req, res) => {
     try {
@@ -298,6 +299,64 @@ const getFacilityList = async (req, res) => {
 //     }
 // }
 
+const getFacilityType = async (req, res) => {
+    try {
+        let responseData = []
+
+        for (let [key, value] of Object.entries(facilityType)) {
+            let tempData = {
+                text: value,
+                value: key
+            }
+
+            responseData.push(tempData)
+        }
+
+        return res.status(200).json({
+            code: 200,
+            message: "OK",
+            data: responseData
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when getting facility type, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting facility type",
+            errors: error
+        });
+    }
+}
+
+const getFacilityStatus = async (req, res) => {
+    try {
+        let responseData = []
+
+        for (let [key, value] of Object.entries(facilityStatus)) {
+            let tempData = {
+                text: value,
+                value: key
+            }
+
+            responseData.push(tempData)
+        }
+
+        return res.status(200).json({
+            code: 200,
+            message: "OK",
+            data: responseData
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when getting facility status, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when getting facility status",
+            errors: error
+        });
+    }
+}
+
 const updateFacilityById = async (req, res) => {
     try {
         let id = req.params.facility_id
@@ -367,5 +426,7 @@ module.exports = {
     createFacility,
     addFacilityItem,
     getFacilityList,
-    updateFacilityById
+    updateFacilityById,
+    getFacilityType,
+    getFacilityStatus
 }
