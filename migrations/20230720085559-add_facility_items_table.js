@@ -49,6 +49,10 @@ module.exports = {
         field: "finish_time",
         type: Sequelize.TIME
       },
+      price: {
+        field: "price",
+        type: Sequelize.FLOAT
+      },
       isActive: {
         field: "is_active",
         type: Sequelize.BOOLEAN,
