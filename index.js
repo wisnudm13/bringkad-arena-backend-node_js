@@ -36,11 +36,7 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions)
 const app = express();
 
 // set cors
-var corsOptions = {
-    origin: "http://localhost:8081"
-}
-
-app.use(cors(corsOptions))
+app.use(cors())
 
 // for body of the request
 app.use(express.json())
