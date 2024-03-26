@@ -111,7 +111,10 @@ const loginUser = async (req, res) => {
             deletedAt: fn("NOW"),
         }, {
             where: {
-                userID: user.id
+                userID: user.id,
+                isDeleted: {
+                    [Op.eq]: false
+                }
             }
         });
 

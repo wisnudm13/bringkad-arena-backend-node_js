@@ -114,8 +114,13 @@ const loginAdmin = async (req, res) => {
             deletedAt: fn("NOW")
         }, {
             where: {
-                adminID: admin.id
+                adminID: admin.id,
+                isDeleted: {
+                    [Op.eq]: false
+                }
             }
+
+
         });
 
         let tokenData = {
