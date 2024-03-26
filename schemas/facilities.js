@@ -13,7 +13,7 @@ const createFacilitySchema = Joi.object().keys({
             });
 
             if (getAdmin) {
-                throw new Joi.ValidationError("Username has been used")
+                throw new Joi.ValidationError("Facility name has been used")
             }
 
         })

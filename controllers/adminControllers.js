@@ -111,6 +111,7 @@ const loginAdmin = async (req, res) => {
         await db.tokens.update({
             isActive: false,
             isDeleted: true,
+            deletedAt: fn("NOW")
         }, {
             where: {
                 adminID: admin.id
@@ -120,7 +121,7 @@ const loginAdmin = async (req, res) => {
         let tokenData = {
             adminID: admin.id,
             token: authToken,
-            isActive: true
+            isActive: true,
         }
 
         // save the new token in db 

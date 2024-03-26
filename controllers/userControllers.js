@@ -108,6 +108,7 @@ const loginUser = async (req, res) => {
         await db.tokens.update({
             isActive: false,
             isDeleted: true,
+            deletedAt: fn("NOW"),
         }, {
             where: {
                 userID: user.id
