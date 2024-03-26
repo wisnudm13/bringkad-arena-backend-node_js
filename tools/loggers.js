@@ -4,7 +4,6 @@ const customFormat = winston.format.combine(
     winston.format.timestamp(), winston.format.printf((info) => {
         return `${info.timestamp} - [${info.level.toUpperCase()}] - ${info.message}`
     }),
-
 )
 
 const errorLogger = winston.createLogger({

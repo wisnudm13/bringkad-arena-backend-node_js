@@ -8,8 +8,8 @@ const createFacilitySchema = Joi.object().keys({
         .min(4)
         .label("Facility Name")
         .external(async (data) => {
-            const getAdmin = await db.admins.findOne({ 
-                where: { username: data, is_deleted: false }
+            const getAdmin = await db.facilities.findOne({ 
+                where: { name: data, is_deleted: false }
             });
 
             if (getAdmin) {
@@ -127,7 +127,20 @@ const addFacilityItemSchema = Joi.object().keys({
             is: Joi.any().valid(null, ""),
             then: Joi.optional().allow(null, ""),
             otherwise: Joi.required()
+        }),
+    price: Joi.number()
+        .required()
+        .label("Price")
+        .external(async (data) => {
+            if (data < 0) {
+                throw new Joi.ValidationError("Price cannot be < 0")
+            }
+
         })
+        .messages({
+            "any.required": "{#label} is a required field",
+            "any.empty": "{#label} cannot be empty",
+        }),
 })
 
 const updateFacilitySchema = Joi.object().keys({
@@ -155,9 +168,12 @@ const updateFacilitySchema = Joi.object().keys({
         })
 })
 
+const updateFacilityItemSchema = {}
+
 module.exports = { 
     createFacilitySchema,
     addFacilityItemSchema,
     getListFacilitySchema,
-    updateFacilitySchema
+    updateFacilitySchema,
+    updateFacilityItemSchema
 }
