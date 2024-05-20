@@ -3,7 +3,6 @@ const db = require("../models")
 const { Op, fn } = require("sequelize");
 const { errorLogger, appLogger } = require("../tools/loggers.js");
 const { facilityType, facilityStatus } = require("../tools/enums");
-const { date } = require("joi");
 
 const createFacility = async (req, res) => {
     try {
@@ -80,6 +79,7 @@ const addFacilityItem = async (req, res) => {
 
             data.facilityID = getFacility.id
             data.name = facilityName
+            data.price = req.body.price
             
             if (req.body.start_time != null) {
                 data.startTime = req.body.start_time
@@ -112,7 +112,7 @@ const addFacilityItem = async (req, res) => {
 
 const validateAddFacilityItem = async function (facilityData, requestBody) {
     let errorMessage = ""
-
+    
     switch (facilityData.type) {
         case "SPORT":
             if (requestBody.start_time == null || requestBody.finish_time == null) {
@@ -288,204 +288,195 @@ const getFacilityList = async (req, res) => {
     }
 }
 
-// const loginUser = async (req, res) => {
-//     try {
-//         // check if user is found
-//         const user = await db.users.findOne({
-//             where: {
-//                 isDeleted: {
-//                     [Op.eq]: false
-//                 },
-//                 phoneNumber: {
-//                     [Op.eq]: req.body.phone_number
-//                 }
-//             }
-//         })
+const getFacilityById = async (req, res) => {
+    let id = req.params.facility_id
 
-//         if (user == null) {
-//             return res.status(400).json({
-//                 code: 400,
-//                 message: "Password or Phone Number incorrect",
-//                 data: {}
-//             })
-//         }
+    let getFacility = await db.facilities.findOne({ 
+        where: { id: id },
+        attributes: [
+            "id",
+            "name",
+            "type",
+            "description",
+            "status",
+        ]
+    })
 
-//         const userCred = await db.user_credentials.findOne({
-//             where: {
-//                 userID: user.id
-//             }
-//         })
+    if (getFacility == null) {
+        getFacility = "No Facility found in given ID"
+    }
 
-//         if (userCred == null) {
-//             return res.status(400).json({
-//                 code: 400,
-//                 message: "Password or Phone Number incorrect",
-//                 data: {}
-//             })
-//         }
+    return res.status(200).json({
+        code: 200,
+        message: "OK",
+        data: getFacility
+    })
+}
 
-//         // check if password is valid
-//         checkPassword = await tools.checkHashPassword(req.body.password, userCred.password);
+const getFacilityItemById = async (req, res) => {
+    let id = req.params.user_id
 
-//         if (!checkPassword) {
-//             return res.status(400).json({
-//                 code: 400,
-//                 message: "Password or Phone Number incorrect",
-//                 data: {}
-//             })
-//         };
+    let getUser = await db.users.findOne({ 
+        where: { id: id },
+        attributes: [
+            "id",
+            "name",
+            "phone_number",
+        ]
+    })
 
-//         // generate jwt token for auth token
-//         let tokenPayload = {
-//             user_id: user.id,
-//             user_name: user.name
-//         };
+    if (getUser == null) {
+        getUser = "No User found in given ID"
+    }
 
-//         authToken = await tools.generateAuthToken(tokenPayload);
+    return res.status(200).json({
+        code: 200,
+        message: "OK",
+        data: getUser
+    })
+}
 
-//         if (authToken == null) {
-//             return res.status(400).json({
-//                 code: 400,
-//                 message: "Login Error",
-//                 data: {}
-//             })
-//         };
+const deleteFacilityById = async (req, res) => {
+    try {
+        let id = req.params.user_id
 
-//         // expire all token in db
-//         await db.tokens.update({
-//             isActive: false,
-//             isDeleted: true,
-//         }, {
-//             where: {
-//                 userID: user.id
-//             }
-//         });
+        // find user by id
+        let getUser = await db.users.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
 
-//         let tokenData = {
-//             userID: user.id,
-//             token: authToken,
-//             isActive: true
-//         }
+        if (getUser == null) {
+            getUser = "No User found in given ID"
 
-//         // save the new token in db 
-//         await db.tokens.create(tokenData)
+            return res.status(400).json({
+                code: 400,
+                message: getUser,
+                data: {}
+            })
+        }
 
-//         return res.status(200).json({
-//             code: 200,
-//             message: "OK",
-//             data: {
-//                 auth_token: authToken,
-//                 user_id: user.id,
-//                 user_name: user.name
-//             }
+        // update is_deleted in user
+        await db.users.update({
+            isActive: false,
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                id: getUser.id
+            }
+        });
 
-//         })
+        // update is_deleted in user_credentials
+        await db.user_credentials.update({
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                userID: getUser.id
+            }
+        });
 
-//     } catch (error) {
-//         errorLogger.error("Error occured when login user, error: " + error)
-//         return res.status(400).json({
-//             code: 400,
-//             message: "Error occured when login user",
-//             errors: error
-//         });
-//     }
-    
-// }
+        // expire all token in db
+        await db.tokens.update({
+            isActive: false,
+            isDeleted: true,
+        }, {
+            where: {
+                userID: getUser.id
+            }
+        });
 
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully deleted user",
+            data: {}
+        })
 
-// const getUserById = async (req, res) => {
-//     let id = req.params.user_id
+    } catch (error) {
+        errorLogger.error("Error occured when deleting user, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when deleting user",
+            errors: error
+        });
+    }
+}
 
-//     let getUser = await db.users.findOne({ 
-//         where: { id: id },
-//         attributes: [
-//             "id",
-//             "name",
-//             "phone_number",
-//         ]
-//     })
+const deleteFacilityItemById = async (req, res) => {
+    try {
+        let id = req.params.user_id
 
-//     if (getUser == null) {
-//         getUser = "No User found in given ID"
-//     }
+        // find user by id
+        let getUser = await db.users.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
 
-//     return res.status(200).json({
-//         code: 200,
-//         message: "OK",
-//         data: getUser
-//     })
-// }
+        if (getUser == null) {
+            getUser = "No User found in given ID"
 
-// const deleteUserById = async (req, res) => {
-//     try {
-//         let id = req.params.user_id
+            return res.status(400).json({
+                code: 400,
+                message: getUser,
+                data: {}
+            })
+        }
 
-//         // find user by id
-//         let getUser = await db.users.findOne({ 
-//             where: { 
-//                 id: id,
-//                 isDeleted: {
-//                     [Op.eq]: false
-//                 }, 
-//             },
-//         })
+        // update is_deleted in user
+        await db.users.update({
+            isActive: false,
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                id: getUser.id
+            }
+        });
 
-//         if (getUser == null) {
-//             getUser = "No User found in given ID"
+        // update is_deleted in user_credentials
+        await db.user_credentials.update({
+            isDeleted: true,
+            deletedAt: fn("NOW")
+        }, {
+            where: {
+                userID: getUser.id
+            }
+        });
 
-//             return res.status(400).json({
-//                 code: 400,
-//                 message: getUser,
-//                 data: {}
-//             })
-//         }
+        // expire all token in db
+        await db.tokens.update({
+            isActive: false,
+            isDeleted: true,
+        }, {
+            where: {
+                userID: getUser.id
+            }
+        });
 
-//         // update is_deleted in user
-//         await db.users.update({
-//             isActive: false,
-//             isDeleted: true,
-//             deletedAt: fn("NOW")
-//         }, {
-//             where: {
-//                 id: getUser.id
-//             }
-//         });
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully deleted user",
+            data: {}
+        })
 
-//         // update is_deleted in user_credentials
-//         await db.user_credentials.update({
-//             isDeleted: true,
-//             deletedAt: fn("NOW")
-//         }, {
-//             where: {
-//                 userID: getUser.id
-//             }
-//         });
-
-//         // expire all token in db
-//         await db.tokens.update({
-//             isActive: false,
-//             isDeleted: true,
-//         }, {
-//             where: {
-//                 userID: getUser.id
-//             }
-//         });
-
-//         return res.status(200).json({
-//             code: 200,
-//             message: "Successfully deleted user",
-//             data: {}
-//         })
-
-//     } catch (error) {
-//         errorLogger.error("Error occured when deleting user, error: " + error)
-//         return res.status(400).json({
-//             code: 400,
-//             message: "Error occured when deleting user",
-//             errors: error
-//         });
-//     }
-// }
+    } catch (error) {
+        errorLogger.error("Error occured when deleting user, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when deleting user",
+            errors: error
+        });
+    }
+}
 
 const getFacilityType = async (req, res) => {
     try {
@@ -610,11 +601,81 @@ const updateFacilityById = async (req, res) => {
 
 }
 
+const updateFacilityItemById = async (req, res) => {
+    try {
+        let id = req.params.facility_id
+        let facilityData = {}
+
+        // find facility by id
+        let getFacility = await db.facilities.findOne({ 
+            where: { 
+                id: id,
+                isDeleted: {
+                    [Op.eq]: false
+                }, 
+            },
+        })
+
+        if (getFacility == null) {
+            getFacility = "No Facility found in given ID"
+
+            return res.status(400).json({
+                code: 400,
+                message: getFacility,
+                data: {}
+            })
+        }
+
+        if (req.body.name != null) {
+            facilityData["name"] = req.body.name
+
+        }
+
+        if (req.body.status != null) {
+            facilityData["status"] = req.body.status
+
+        }
+
+        if (req.body.description != null) {
+            facilityData["description"] = req.body.description
+
+        }
+
+        if (!tools.isObjectEmpty(facilityData)) {
+            await db.facilities.update(facilityData, {
+                where: {
+                    id: getFacility.id
+                }
+            });
+        }
+
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully updated facility",
+            data: {}
+        })
+
+    } catch (error) {
+        errorLogger.error("Error occured when updating facility, error: " + error)
+        return res.status(400).json({
+            code: 400,
+            message: "Error occured when updating facility",
+            errors: error
+        });
+    }
+
+}
+
 module.exports = {
     createFacility,
     addFacilityItem,
     getFacilityList,
     updateFacilityById,
     getFacilityType,
-    getFacilityStatus
+    getFacilityStatus,
+    deleteFacilityById,
+    getFacilityById,
+    deleteFacilityItemById,
+    updateFacilityItemById,
+    getFacilityItemById
 }

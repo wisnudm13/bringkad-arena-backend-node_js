@@ -12,7 +12,7 @@ const registerAdmin = async (req, res) => {
             isActive: true
         }
 
-        appLogger.info("Attempting create user, data: " + JSON.stringify(data))
+        appLogger.info("Attempting create admin, data: " + JSON.stringify(data))
         
         // create new admin
         const admin = await db.admins.create(data)

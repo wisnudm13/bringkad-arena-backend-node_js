@@ -18,6 +18,8 @@ userRouter.get("/list",
     userController.getUserList
 )
 userRouter.get("/:user_id", authValidator("user"), userController.getUserById)
+userRouter.get("/admin/:user_id", authValidator("admin"), userController.getUserById)
+
 userRouter.put("/:user_id", 
     [authValidator("user"), schemaValidator(userSchema.updateUserSchema)], 
     userController.updateUserById
