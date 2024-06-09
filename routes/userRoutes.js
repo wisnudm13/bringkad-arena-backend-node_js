@@ -24,6 +24,10 @@ userRouter.put("/:user_id",
     [authValidator("user"), schemaValidator(userSchema.updateUserSchema)], 
     userController.updateUserById
 )
+userRouter.put("/admin/:user_id", 
+    [authValidator("admin"), schemaValidator(userSchema.updateUserSchema)], 
+    userController.updateUserById
+)
 userRouter.delete("/:user_id", authValidator("admin"), userController.deleteUserById)
 
 module.exports = userRouter

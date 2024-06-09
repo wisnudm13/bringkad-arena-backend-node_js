@@ -167,6 +167,9 @@ const getUserList = async (req, res) => {
             offset: offset,
             limit: limit,
             where: queryFilter,
+            order: [
+                ["id", "ASC"]
+            ],
             attributes: [
                 "id",
                 "name",

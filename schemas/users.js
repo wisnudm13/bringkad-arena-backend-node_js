@@ -92,7 +92,6 @@ const updateUserSchema = Joi.object().keys({
             "string.max": "{#label} should have a maximum length of {#limit}",
         }),
     phone_number: Joi.string()
-        .required()
         .label("Phone Number")
         .external(async (data) => {
             if (!tools.isIndonesianPhoneNumber(data)) {
