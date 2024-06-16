@@ -3,6 +3,7 @@ const db = require("../models")
 const { Op, fn } = require("sequelize");
 const { errorLogger, appLogger } = require("../tools/loggers.js");
 const { facilityType, facilityStatus } = require("../tools/enums");
+const { func } = require("joi");
 
 const createFacility = async (req, res) => {
     try {
@@ -17,6 +18,20 @@ const createFacility = async (req, res) => {
         
         // create new facility
         const facility = await db.facilities.create(facilityData)
+
+        if (req.files != null) {
+            req.files.facility_images.map(function(file) {
+                let fileAsset = {
+                    fileType: "FACILITY_IMAGE",
+                    filePath: file.path.split('/').slice(1).join('/'),
+                    referenceType: "FACILITY",
+                    referenceID: facility.id
+                }
+
+                db.file_assets.create(fileAsset)
+
+            })
+        }
 
         return res.status(200).json({
             code: 200,
