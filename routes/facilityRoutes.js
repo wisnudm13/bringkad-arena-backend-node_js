@@ -3,8 +3,8 @@ const facilityRouter = require("express").Router()
 const { schemaValidator } = require("../tools/schemaValidators.js")
 const { authValidator } = require("../tools/authValidators.js")
 const facilitySchema = require("../schemas/facilities.js")
-const multer = require("multer")
-const upload = multer()
+
+const { fileUploader, upload } = require("../tools/uploads.js");
 
 // protected API
 // facilityRouter.post("/create", 
@@ -14,7 +14,14 @@ const upload = multer()
 
 // facility
 facilityRouter.post("/create", 
-    [authValidator("admin"), schemaValidator(facilitySchema.createFacilitySchema)], 
+    [upload.fields(
+        [
+            {
+                name: "facility_images",
+                maxCount: 5
+            },
+        ]
+    ), fileUploader, schemaValidator(facilitySchema.createFacilitySchema)], 
     facilityController.createFacility
 )
 facilityRouter.get("/list", 

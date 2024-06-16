@@ -15,6 +15,8 @@ const schemaValidator = (schema) => async function(req, res, next) {
             Object.assign(data, req.query)
         }
 
+        console.log(req.files)
+
         await schema.validateAsync(data);
         next();
 

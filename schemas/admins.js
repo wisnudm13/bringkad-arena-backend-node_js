@@ -88,6 +88,7 @@ const updateAdminSchema = Joi.object().keys({
             "string.min": "{#label} should have a minimum length of {#limit}",
             "string.max": "{#label} should have a maximum length of {#limit}",
         }),
+        
     email: Joi.string()
         .lowercase()
         .email()

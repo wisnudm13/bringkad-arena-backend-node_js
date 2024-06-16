@@ -9,6 +9,7 @@ const userRouter = require("./routes/userRoutes.js");
 const facilityRouter = require('./routes/facilityRoutes.js')
 const db = require("./models");
 const { errorLogger, appLogger } = require("./tools/loggers");
+const path = require('path')
 
 // instantiate swagger config
 const swaggerDefinition = {
@@ -41,6 +42,7 @@ app.use(cors())
 // for body of the request
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.resolve('./public')));
 
 // routes
 app.use("/v1/admins/", adminRouter)
@@ -54,7 +56,7 @@ app.get("/", (req, res) => {
   });
   
 // set port, listen for requests
-const PORT = process.env.PORT || 6060;
+const PORT = process.env.PORT || 5001;
 
 // sync the db or use authenticate if dont want to sync the table
 // db.sequelize.sync()
