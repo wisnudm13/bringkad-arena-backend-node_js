@@ -18,7 +18,7 @@ facilityRouter.post("/create",
         [
             {
                 name: "facility_images",
-                maxCount: 5
+                maxCount: 1
             },
         ]
     ), fileUploader, schemaValidator(facilitySchema.createFacilitySchema)], 
@@ -31,7 +31,14 @@ facilityRouter.get("/list",
 facilityRouter.get("/type/list", facilityController.getFacilityType)
 facilityRouter.get("/status/list", facilityController.getFacilityStatus)
 facilityRouter.put("/:facility_id", 
-    [authValidator("admin"), schemaValidator(facilitySchema.updateFacilitySchema)],
+    [upload.fields(
+        [
+            {
+                name: "facility_images",
+                maxCount: 1
+            },
+        ]
+    ), fileUploader, authValidator("admin"), schemaValidator(facilitySchema.updateFacilitySchema)],
     facilityController.updateFacilityById
 )
 facilityRouter.get("/:facility_id", authValidator("admin"), facilityController.getFacilityById)

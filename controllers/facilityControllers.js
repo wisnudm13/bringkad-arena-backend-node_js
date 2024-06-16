@@ -19,7 +19,7 @@ const createFacility = async (req, res) => {
         // create new facility
         const facility = await db.facilities.create(facilityData)
 
-        if (req.files != null) {
+        if (req.files.facility_images) {
             req.files.facility_images.map(function(file) {
                 let fileAsset = {
                     fileType: "FACILITY_IMAGE",
@@ -324,10 +324,34 @@ const getFacilityById = async (req, res) => {
         getFacility = "No Facility found in given ID"
     }
 
+    let getFacilityFileAsset = await db.file_assets.findOne({
+        where: {
+            referenceID: id,
+            referenceType: "FACILITY",
+            fileType: "FACILITY_IMAGE",
+            isDeleted: {
+                [Op.eq]: false
+            }, 
+        },
+        attributes: [
+            "id",
+            "filePath"
+        ]
+    })
+
+    const response = {
+        id: getFacility.id,
+        name: getFacility.name,
+        type: getFacility.type,
+        description: getFacility.description,
+        status: getFacility.status,
+        facility_image: getFacilityFileAsset?.filePath ? getFacilityFileAsset?.filePath : null
+    }
+
     return res.status(200).json({
         code: 200,
         message: "OK",
-        data: getFacility
+        data: response
     })
 }
 
@@ -356,10 +380,10 @@ const getFacilityItemById = async (req, res) => {
 
 const deleteFacilityById = async (req, res) => {
     try {
-        let id = req.params.user_id
+        let id = req.params.facility_id
 
-        // find user by id
-        let getUser = await db.users.findOne({ 
+        // find facility by id
+        let getFacility = await db.facilities.findOne({ 
             where: { 
                 id: id,
                 isDeleted: {
@@ -368,58 +392,57 @@ const deleteFacilityById = async (req, res) => {
             },
         })
 
-        if (getUser == null) {
-            getUser = "No User found in given ID"
+        if (getFacility == null) {
+            getFacility = "No Facility found in given ID"
 
             return res.status(400).json({
                 code: 400,
-                message: getUser,
+                message: getFacility,
                 data: {}
             })
         }
 
-        // update is_deleted in user
-        await db.users.update({
-            isActive: false,
+        // update is_deleted in facility
+        await db.facilities.update({
             isDeleted: true,
             deletedAt: fn("NOW")
         }, {
             where: {
-                id: getUser.id
+                id: getFacility.id
             }
         });
 
-        // update is_deleted in user_credentials
-        await db.user_credentials.update({
-            isDeleted: true,
-            deletedAt: fn("NOW")
-        }, {
-            where: {
-                userID: getUser.id
-            }
-        });
+        // // update is_deleted in user_credentials
+        // await db.user_credentials.update({
+        //     isDeleted: true,
+        //     deletedAt: fn("NOW")
+        // }, {
+        //     where: {
+        //         userID: getUser.id
+        //     }
+        // });
 
-        // expire all token in db
-        await db.tokens.update({
-            isActive: false,
-            isDeleted: true,
-        }, {
-            where: {
-                userID: getUser.id
-            }
-        });
+        // // expire all token in db
+        // await db.tokens.update({
+        //     isActive: false,
+        //     isDeleted: true,
+        // }, {
+        //     where: {
+        //         userID: getUser.id
+        //     }
+        // });
 
         return res.status(200).json({
             code: 200,
-            message: "Successfully deleted user",
+            message: "Successfully deleted facility",
             data: {}
         })
 
     } catch (error) {
-        errorLogger.error("Error occured when deleting user, error: " + error)
+        errorLogger.error("Error occured when deleting facility, error: " + error)
         return res.status(400).json({
             code: 400,
-            message: "Error occured when deleting user",
+            message: "Error occured when deleting facility",
             errors: error
         });
     }
@@ -600,6 +623,32 @@ const updateFacilityById = async (req, res) => {
                     id: getFacility.id
                 }
             });
+        }
+
+        if (req.files.facility_images) {
+            // update is_deleted in file asset
+            await db.file_assets.update({
+                isDeleted: true,
+                deletedAt: fn("NOW")
+            }, {
+                where: {
+                    referenceID: getFacility.id,
+                    referenceType: "FACILITY",
+                    fileType: "FACILITY_IMAGE"
+                }
+            });
+
+            req.files.facility_images.map(function(file) {
+                let fileAsset = {
+                    fileType: "FACILITY_IMAGE",
+                    filePath: file.path.split('/').slice(1).join('/'),
+                    referenceType: "FACILITY",
+                    referenceID: getFacility.id
+                }
+
+                db.file_assets.create(fileAsset)
+
+            })
         }
 
         return res.status(200).json({
